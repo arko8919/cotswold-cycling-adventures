@@ -1,0 +1,43 @@
+{
+    "parserOptions": {
+      "ecmaVersion": 2021,
+      "sourceType": "module"
+    },
+    "env": {
+      "browser": true,
+      "node": true,
+      "es6": true,
+      "amd": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "airbnb",
+      "prettier",
+      "plugin:node/recommended"
+    ],
+    "plugins": ["prettier"],
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "lf"
+        }
+      ],
+      "node/no-unsupported-features/es-syntax": "off",
+      "node/no-missing-import": "off",
+      "node/no-unpublished-import": "off",
+      "node/no-extraneous-import": "off",
+      "spaced-comment": "off",
+      "no-console": "warn",
+      "consistent-return": "off",
+      "func-names": "off",
+      "object-shorthand": "off",
+      "no-process-exit": "off",
+      "no-param-reassign": "off",
+      "no-return-await": "off",
+      "no-underscore-dangle": "off",
+      "class-methods-use-this": "off",
+      "prefer-destructuring": ["error", { "object": true, "array": false }],
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|val" }]
+    }
+  }

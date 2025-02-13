@@ -1,0 +1,17 @@
+@use '../helpers/index' as *;
+
+// "General" Styles
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+main {
+    // Removes right side white screen overflow
+    overflow: hidden;
+}
