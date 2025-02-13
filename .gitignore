@@ -1,6 +1,7 @@
 # Node.js dependencies
 node_modules/
 dev-data
+config.env
 npm-debug.log
 yarn-error.log
 pnpm-debug.log
