@@ -6,6 +6,7 @@ import displayMap from './mapbox';
 import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
 import { bookAdventure } from './stripe';
+import { showAlert } from './alerts';
 
 // DOM elements
 const mapBox = document.getElementById('map');
@@ -77,3 +78,6 @@ if (bookBtn)
     const { adventureId } = e.target.dataset;
     bookAdventure(adventureId);
   });
+
+const alertMessage = document.querySelector('body').dataset.alert;
+if (alertMessage) showAlert('success', alertMessage, 20);

@@ -38,15 +38,6 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   // Finds a user by email and includes the password field (which is normally hidden).
   const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    console.log('User not found.');
-  } else {
-    console.log(
-      'Password Match:',
-      await bcrypt.compare(password, user.password),
-    );
-    console.log('Password Changed At:', user.passwordChangedAt);
-  }
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password!', 401));

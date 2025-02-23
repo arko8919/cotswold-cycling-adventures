@@ -21,11 +21,13 @@ const adventureRouter = require('./routes/adventureRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
 app.enable('trust proxy');
+//app.set('trust proxy', false);
 
 // Sets Pug as the template engine for rendering dynamic HTML views.
 app.set('view engine', 'pug');
@@ -63,6 +65,13 @@ const limiter = rateLimit({
 // Applies rate limiting to all API routes,
 //  protecting against excessive requests and potential denial-of-service attacks.
 app.use('/api', limiter);
+
+// We use it here as we need body in raw form ( as string not JSON )
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout,
+);
 
 // Parses incoming JSON requests with a size limit of 10KB to prevent
 //  excessive data payloads and enhance security.

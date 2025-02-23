@@ -1,8 +1,16 @@
-const User = require('../models/userModel');
 const Adventure = require('../models/adventureModel');
 const Booking = require('../models/bookingModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+
+// Sets a success alert message for booking confirmations based on query parameters.
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === 'booking')
+    res.locals.alert =
+      "Your booking was successful! Please check your email for a confirmation. If your booking doesn't show up here immediatly, please come back later.";
+  next();
+};
 
 // Renders the overview page with all adventures
 exports.getOverview = catchAsync(async (req, res, next) => {

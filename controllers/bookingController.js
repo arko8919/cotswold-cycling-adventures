@@ -2,9 +2,8 @@
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Adventure = require('../models/adventureModel');
-//const User = require('../models/userModel');
+const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
-//const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
@@ -16,11 +15,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `${req.protocol}://${req.get('host')}/?adventure=${
-      req.params.adventureId
-    }&user=${req.user.id}&price=${adventure.price}`,
     // Soon as purchase was successful the user will be redirected to this URL
-    // success_url: `${req.protocol}://${req.get('host')}/`,
+    success_url: `${req.protocol}://${req.get('host')}/my-adventures?alert=booking`,
     // Page the user goes if they choose to cancel the current payment
     cancel_url: `${req.protocol}://${req.get('host')}/adventure/${adventure.slug}`,
     // User is already at the request as this is protected route
@@ -39,7 +35,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
             name: `${adventure.name} Adventure`,
             description: adventure.summary,
             images: [
-              `https://natours.dev/img/adventures/${adventure.imageCover}`,
+              `${req.protocol}://${req.get('host')}/img/adventures/${adventure.imageCover}`,
             ],
           },
           unit_amount: adventure.price * 100,
@@ -56,42 +52,44 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-  // This is only TEMPORARY, because it's UNSECURE: everyone can make bookings without paying
-  const { adventure, user, price } = req.query;
+// Creates a new booking in the database after a successful Stripe checkout session.
+const createBookingCheckout = async (session) => {
+  // Extracts the adventure ID from the session's client reference ID.
+  const adventure = session.client_reference_id;
+  // Finds the user based on their email from the session data and retrieves their ID.
+  const user = (await User.findOne({ email: session.customer_email })).id;
+  // Extracts the booking price from the session (converting cents to the standard currency format).
+  const price = session.amount_total / 100;
 
-  if (!adventure && !user && !price) return next();
+  // Saves the new booking record in the database.
   await Booking.create({ adventure, user, price });
+};
 
-  res.redirect(req.originalUrl.split('?')[0]);
-});
+// Handles Stripe webhook events to process successful checkout sessions.
+exports.webhookCheckout = (req, res, next) => {
+  //Extracts the Stripe signature from request headers.
+  const signature = req.headers['stripe-signature'];
 
-// const createBookingCheckout = async (session) => {
-//   const adventure = session.client_reference_id;
-//   const user = (await User.findOne({ email: session.customer_email })).id;
-//   const price = session.display_items[0].amount / 100;
-//   await Booking.create({ adventure, user, price });
-// };
+  let event;
+  try {
+    // Verifies the event using Stripe's webhook secret to ensure authenticity.
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+  } catch (err) {
+    // If verification fails, returns a 400 error response.
+    return res.status(400).send(`Webhook error: ${err.message}`);
+  }
 
-// exports.webhookCheckout = (req, res, next) => {
-//   const signature = req.headers['stripe-signature'];
+  // If the event type is 'checkout.session.completed', triggers the booking creation process.
+  if (event.type === 'checkout.session.completed')
+    createBookingCheckout(event.data.object);
 
-//   let event;
-//   try {
-//     event = stripe.webhooks.constructEvent(
-//       req.body,
-//       signature,
-//       process.env.STRIPE_WEBHOOK_SECRET,
-//     );
-//   } catch (err) {
-//     return res.status(400).send(`Webhook error: ${err.message}`);
-//   }
-
-//   if (event.type === 'checkout.session.completed')
-//     createBookingCheckout(event.data.object);
-
-//   res.status(200).json({ received: true });
-// };
+  // Sends a 200 response to acknowledge receipt of the event.
+  res.status(200).json({ received: true });
+};
 
 exports.createBooking = factory.createOne(Booking);
 exports.getBooking = factory.getOne(Booking);

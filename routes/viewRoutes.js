@@ -1,13 +1,15 @@
 const express = require('express');
 const viewsController = require('../controllers/viewsController');
 const authController = require('../controllers/authController');
-const bookingController = require('../controllers/bookingController');
 
 const router = express.Router();
 
+// Apply the alerts middleware to set booking confirmation messages
+//  for all routes in this router.
+router.use(viewsController.alerts);
+
 router.get(
   '/',
-  bookingController.createBookingCheckout, // Handles booking checkout before rendering
   authController.isLoggedIn, // Checks if the user is logged in
   viewsController.getOverview, // Renders the homepage
 );
@@ -24,7 +26,6 @@ router.get('/me', authController.protect, viewsController.getAccount);
 // Route for viewing a user's booked adventures (protected)
 router.get(
   '/my-adventures',
-  bookingController.createBookingCheckout, // Ensures booking checkout before loading the page
   authController.protect, // Restricts access to logged-in users only
   viewsController.getMyAdventures, // Renders the user's booked adventures page
 );
