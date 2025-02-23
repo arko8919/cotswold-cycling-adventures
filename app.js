@@ -10,6 +10,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 // Error Handling
 const AppError = require('./utils/appError');
@@ -32,6 +33,13 @@ app.set('view engine', 'pug');
 // Specifies the directory for Pug template files,
 //  ensuring the app correctly locates and renders views.
 app.set('views', path.join(__dirname, 'views'));
+
+// Enable Cross-Origin Resource Sharing (CORS) to allow requests from different origins.
+app.use(cors());
+
+// Enable CORS pre-flight requests for all routes, allowing browsers to send
+// an OPTIONS request before making certain types of requests (e.g., PUT, DELETE).
+app.options('*', cors());
 
 ////////  GLOBAL MIDDLEWARES ////////
 
