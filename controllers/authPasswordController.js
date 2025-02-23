@@ -77,7 +77,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save();
   // Log the user in, send JWT to the client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 // UPDATE PASSWORD
@@ -96,5 +96,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save();
 
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });

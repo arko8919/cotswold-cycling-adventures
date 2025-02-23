@@ -23,7 +23,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   // Send a welcome email to the newly registered user with a provided URL
   await new Email(newUser, url).sendWelcome();
 
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 // LOGIN USER
@@ -52,7 +52,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password!', 401));
   }
 
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 // LOGOUT USER

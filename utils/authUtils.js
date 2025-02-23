@@ -7,32 +7,32 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-// Generates a JWT token, stores it in a cookie, and sends it in the response.
-// Hides the password before sending user data and ensures cookies are secure in production.
-const createSendToken = (user, statusCode, res) => {
+// Generates and sends a JWT token to authenticate the user,
+// storing it in a secure HTTP-only cookie.
+// Also removes the password from the response for security
+// before sending user data in JSON format.
+const createSendToken = (user, statusCode, req, res) => {
   // Log the user into the application by sending a token.
   const token = signToken(user);
 
-  // Create cookie ( important when working with templates, not so much with REST API )
-  const cookieOptions = {
+  // Set a cookie named 'jwt' with the authentication token
+  res.cookie('jwt', token, {
+    // Cookie expires after the specified number of days (converted to milliseconds)
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
-    //secure: true, // Only sent on encrypted connection HTTPS
-    httpOnly: true, // Cookie cannot be accessed or modified in any way by the browser
-  };
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-
-  // Stores the JWT token in a cookie for secure authentication.
-  res.cookie('jwt', token, cookieOptions);
+    // Make the cookie accessible only via HTTP (prevents client-side JavaScript access for security)
+    httpOnly: true,
+    // Ensure the cookie is sent only over HTTPS when the request is secure
+    secure: req.secure || req.headers('x-forwarded-proto') === 'https',
+  });
 
   // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
-    token,
+    token, // We only want to send token if the user is logged
     data: {
       user,
     },

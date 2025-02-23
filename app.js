@@ -24,6 +24,8 @@ const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
+app.enable('trust proxy');
+
 // Sets Pug as the template engine for rendering dynamic HTML views.
 app.set('view engine', 'pug');
 
