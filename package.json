@@ -9,9 +9,9 @@
     "build:sass": "sass --quiet src/scss/main.scss public/css/style.css",
     "watch:sass": "npx chokidar \"src/scss/**/*.scss\" --initial --ignoreInitial --verbose -c \"npm run build:sass\"",
     "start": "nodemon server.js",
-    "dev": "concurrently -k \"npm run watch:sass\" \"npm run start\"",
+    "dev": "nodemon server.js",
     "watch:js": "parcel watch ./src/js/index.js --out-dir ./public/js --out-file bundle.js",
-    "build:js": "parcel watch ./src/js/index.js --out-dir ./public/js --out-file bundle.js"
+    "build:js": "parcel build ./src/js/index.js --out-dir ./public/js --out-file bundle.js"
   },
   "keywords": [
     "bike",
@@ -43,6 +43,7 @@
     "bcryptjs": "^3.0.0",
     "bootstrap": "^5.3.3",
     "chokidar-cli": "^3.0.0",
+    "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

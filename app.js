@@ -9,6 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 // Error Handling
 const AppError = require('./utils/appError');
@@ -140,6 +141,10 @@ app.use(
     ],
   }),
 );
+
+// This line enables response compression in your Express app,
+// reducing the size of responses and improving performance.
+app.use(compression());
 
 // Adds a requestTime property to each request object, storing the timestamp
 //  of when the request was received for logging or debugging purposes.

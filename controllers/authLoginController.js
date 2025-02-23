@@ -3,6 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Email = require('../utils/email');
 const { createSendToken } = require('../utils/authUtils');
+const bcrypt = require('bcryptjs');
 
 // SIGNUP USER
 exports.signup = catchAsync(async (req, res, next) => {
@@ -37,6 +38,15 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   // Finds a user by email and includes the password field (which is normally hidden).
   const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    console.log('User not found.');
+  } else {
+    console.log(
+      'Password Match:',
+      await bcrypt.compare(password, user.password),
+    );
+    console.log('Password Changed At:', user.passwordChangedAt);
+  }
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password!', 401));
