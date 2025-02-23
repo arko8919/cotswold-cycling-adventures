@@ -8,7 +8,7 @@
     "debug": "ndb server.js",
     "build:sass": "sass --quiet src/scss/main.scss public/css/style.css",
     "watch:sass": "npx chokidar \"src/scss/**/*.scss\" --initial --ignoreInitial --verbose -c \"npm run build:sass\"",
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "dev": "nodemon server.js",
     "watch:js": "parcel watch ./src/js/index.js --out-dir ./public/js --out-file bundle.js",
     "build:js": "parcel build ./src/js/index.js --out-dir ./public/js --out-file bundle.js"
