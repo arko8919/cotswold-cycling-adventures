@@ -1,0 +1,68 @@
+extends base
+
+mixin navItem(link, text, icon, active)
+  li.list-group-item(class=`${active ? 'active' : ''}`)
+    a.nav-link.text-decoration-none.text-dark(href=`${link}`)
+      i.fas(class=`fa-${icon} me-2`)
+      | #{text}
+
+block content
+  .container.my-5.account-page
+    .row.g-4
+      //- Sidebar Navigation
+      .col-md-4
+        .card.shadow-sm
+          .card-header Account Menu
+          .list-group.list-group-flush
+            +navItem('#', 'Settings', 'cog', true)
+            +navItem('/my-adventures', 'My bookings', 'briefcase')
+            +navItem('#', 'My reviews', 'star')
+            +navItem('#', 'Billing', 'credit-card')
+
+          - if (user.role === 'admin')
+            .border-top.p-3.text-white.admin
+              h5 Admin
+              .list-group.list-group-flush
+                +navItem('#', 'Manage tours', 'map')
+                +navItem('#', 'Manage users', 'users')
+                +navItem('#', 'Manage reviews', 'star')
+                +navItem('#', 'Manage bookings', 'briefcase')
+
+      //- Account Settings & Forms
+      .col-md-8
+        .card.shadow-sm
+          .card-body
+            h2.mb-4 Your Account Settings
+            form.form-user-data        
+              .mb-3
+                label.form-label(for='name') Name
+                input#name.form-control(type='text', value=`${user.name}`, required, name='name')
+
+              .mb-3
+                label.form-label(for='email') Email Address
+                input#email.form-control(type='email', value=`${user.email}`, required, name='email')
+
+              .mb-3.profile-photo
+                img(src=`/assets/users/${user.photo}`, alt='User photo')
+                input.form-control(type='file', accept='image/*', id='photo', name='photo')
+
+              button.btn Save Settings
+
+        //- Password Change Section
+        .card.shadow-sm.mt-4
+          .card-body
+            h2.mb-4 Password Change
+            form.form-user-password
+              .mb-3
+                label.form-label(for='password-current') Current Password
+                input#password-current.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+              .mb-3
+                label.form-label(for='password') New Password
+                input#password.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+              .mb-3
+                label.form-label(for='password-confirm') Confirm Password
+                input#password-confirm.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+              button.btn Save Password

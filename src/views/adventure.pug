@@ -1,0 +1,58 @@
+extends base
+include _reviewCard
+
+block content
+  //- Header Content
+  section.text-center.bg-light.py-5
+    .container
+      h1.display-4= adventure.name
+      p.lead= `${adventure.startLocation.description} | ${adventure.duration}` 
+  
+  //- Content
+  section.container.my-5
+    .row
+      .col-md-6
+        h2 Quick facts
+        ul.list-group.list-group-flush
+          - const date = adventure.startDates[0].toLocaleString('en-uk', {month: 'long', year: 'numeric'})
+          li.list-group-item= `Next date: ${date}`
+          li.list-group-item= `Difficulty: ${adventure.difficulty}`
+          li.list-group-item= `Participants: ${adventure.maxGroupSize}`
+          li.list-group-item= `Rating: ${adventure.ratingsAverage}`
+
+      .col-md-6
+        h2 Your adventure guides
+        ul.list-group.list-group-flush
+        each guide in adventure.guides
+          li.list-group-item
+            img.w-25(src=`/assets/users/${guide.photo}`, alt=`${guide.name}`)
+            - if(guide.role === 'lead-guide')
+             span Lead Guide
+            - if(guide.role === 'guide')
+             span Adventure Guide 
+            span= guide.name 
+        
+  section.container.my-5
+    h2 About the adventure
+    - const paragraphs = adventure.description.split('\n')
+    each p in paragraphs
+        p= p
+
+  section.container.my-5
+    h2 Adventure Images
+    .row.g-3
+     each img, i in adventure.images 
+      .col-md-4
+        img.img-fluid.rounded(src=`/assets/adventures/${img}`, alt=`Adventure image`)
+ 
+  section.container.my-5
+    h2.mb-4.text-center Customer Reviews
+    .row.g-4
+     each review in adventure.reviews
+      +reviewCard(review)
+
+  section.text-center.bg-success.text-white.py-5
+    h2 What are you waiting for?
+    p.lead
+      | 10 days. 1 adventure. Infinite memories. Make it yours today!
+    button.btn.btn-light Book adventure now!

@@ -1,0 +1,94 @@
+@use '../helpers/index' as *;
+
+.container.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: $background;
+  /* Light cycling-friendly background */
+
+  .login-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+
+    h2 {
+      font-weight: 700;
+      color: $dark;
+      /* Darker for readability */
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+
+      label {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .form-control {
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid $dark;
+        transition: border-color 0.3s ease;
+
+        &:focus {
+          border-color: $blue;
+          box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+      }
+    }
+
+    .form-check {
+      display: flex;
+      align-items: center;
+
+      .form-check-input {
+        margin-right: 5px;
+      }
+
+      label {
+        font-size: 14px;
+        color: #555;
+      }
+    }
+
+    .btn-primary {
+      background: $dark;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background 0.3s;
+
+      &:hover {
+        background: $blue;
+      }
+    }
+
+    .text-center {
+      margin-top: 15px;
+
+      a {
+        color: $blue;
+        text-decoration: none;
+        font-weight: 600;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+.nav__user-img {
+  height: 3.5rem;
+  width: 3.5rem;
+  border-radius: 50%;
+  margin-right: 1rem;
+}

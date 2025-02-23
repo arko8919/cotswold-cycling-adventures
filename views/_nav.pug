@@ -1,0 +1,32 @@
+nav.navbar.navbar-expand-lg
+  .container-fluid
+    //- Navbar Brand (Logo)
+    .navbar-brand
+      a(href='/') 
+        img(src='/assets/logo-small.png', alt='Cotswold Cycling Adventures logo', height='50')
+      .box 
+        span Eat
+        span Sleep 
+        span Cycle
+    //- Custom Three-Bar Mobile Toggle Button
+    button.navbar-toggler.d-lg-none(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
+      .hamburger
+        span
+        span
+        span
+
+    //- Collapsible Navbar Content
+    #navbarNav.collapse.navbar-collapse
+      ul.navbar-nav.ms-auto
+        if user
+          li.nav-item
+            a.nav-link.btn-logout Log out
+          li.nav-item.nav-user-image
+            a.nav-link(href='/me')
+              img(src=`/assets/users/${user.photo}`, alt=`Photo of ${user.name}`)
+              span= user.name.split(' ')[0]
+        else
+          li.nav-item.ms-lg-3
+            a.nav-link.btn-auth(href='/login') Log in
+          li.nav-item.ms-lg-2
+            a.nav-link.btn-auth(href='#') Sign up

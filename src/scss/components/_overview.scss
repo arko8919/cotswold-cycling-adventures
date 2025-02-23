@@ -1,0 +1,82 @@
+@use '../helpers/index' as *;
+
+
+.card {
+    position: relative;
+    background-color: $light;
+    color: $dark;
+
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+
+    // icons
+    .row {
+        .box {
+            padding-bottom: 0.4rem;
+        }
+
+        span {
+            padding-left: 0.4rem;
+        }
+    }
+}
+
+.card-img-top {
+    opacity: 0.7;
+}
+
+
+.card-title {
+    text-align: center;
+    padding-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.card-subtitle {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding-bottom: .4rem;
+    position: absolute;
+    top: .5rem;
+    left: 1rem;
+    color: $light;
+
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.adventure-details {
+    padding-left: 0;
+    /* Remove default list padding */
+    margin-top: 10px;
+
+    li {
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+        font-size: 0.95rem;
+        color: #444;
+
+        i {
+            color: $yellow;
+            /* Icon color */
+        }
+    }
+}
+
+.card-footer {
+    text-align: center;
+
+    strong {
+        color: $blue;
+    }
+
+    .btn {
+        padding: 1rem 3rem;
+        background-color: $dark;
+        color: $light;
+
+        :hover {
+            background-color: $light;
+            color: $dark;
+        }
+    }
+}

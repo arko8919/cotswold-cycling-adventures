@@ -2,6 +2,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
 
+// Delete adventure document
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
@@ -15,6 +16,7 @@ exports.deleteOne = (Model) =>
     });
   });
 
+// Update adventure document
 exports.updateOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
@@ -34,6 +36,7 @@ exports.updateOne = (Model) =>
     });
   });
 
+// Create adventure document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
@@ -46,9 +49,12 @@ exports.createOne = (Model) =>
     });
   });
 
+// Show adventure document with specified ID
 exports.getOne = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
+    // Finds a document in the database by its ID.
     let query = Model.findById(req.params.id);
+    // If population options are provided ( reviews ), fetch related data for the query.
     if (popOptions) query = query.populate(popOptions);
     const doc = await query;
 
@@ -67,9 +73,15 @@ exports.getOne = (Model, popOptions) =>
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     let filter = {};
-    if (req.params.tourId) filter = { tour: req.params.tourId };
 
-    // Ready Query
+    // -To allow for nested GET reviews on tour
+    // ( check first 2 lines of reviewController.js and this line here)
+    // IF there is tourId in URL then new object is created with that ID, only match tour wit that ID.
+    // IF it is regular API call without nested route, then it show all reviews
+    if (req.params.adventureId) filter = { adventure: req.params.adventureId };
+
+    // Applies filtering, sorting, field limiting, and pagination to the query based on
+    //  request parameters, then retrieves the results.
     const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()

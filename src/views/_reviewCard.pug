@@ -1,0 +1,9 @@
+mixin reviewCard(review)
+  .col-md-4
+    .card.p-3.shadow-sm
+      .d-flex.align-items-center.mb-3
+        img.rounded-circle.img-thumbnail(src=`/assets/users/${review.user.photo}`, style='width: 50px; height: 50px', alt=`${review.user.name}`)
+        .ms-3
+          h6.mb-0= review.user.name
+          small.text-muted= review.rating
+      p.card-text=`${review.review}`

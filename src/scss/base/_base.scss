@@ -3,6 +3,8 @@
 // "General" Styles
 html {
     box-sizing: border-box;
+    // On some small screen size, it disable horizontal scroll bar 
+    overflow-x: hidden;
 }
 
 *,
@@ -11,7 +13,25 @@ html {
     box-sizing: inherit;
 }
 
+body {
+    // On some small screen size, it disable horizontal scroll bar 
+    overflow-x: hidden;
+    background-color: $background;
+    font-family: 'Montserrat', sans-serif;
+    color: $green;
+}
+
 main {
     // Removes right side white screen overflow
     overflow: hidden;
+}
+
+h1 {
+    color: $darkGreen;
+    font-weight: 900;
+    text-shadow: 1px 1px 0 $darkGreen;
+}
+
+h2 {
+    color: $darkGreen;
 }

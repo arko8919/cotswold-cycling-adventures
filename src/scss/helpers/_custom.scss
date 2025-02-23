@@ -18,9 +18,22 @@ $yellow: #F7CE68 !default;
 $footer: #151414 !default;
 $navbar-light-active-color: $white;
 
+$darkGreen: #002305;
+$warmBeige: #cdc3ad;
 
-$primary: $orange;
-$secondary: $yellow;
+$green: #8CA88A; // Primary Green (Nature Theme
+$blue: #2B5B88; // Blue Dark
+$brown: #8C6A5D; // Earthy Brown (Natural Touch)
+$yellow: #F4A261; // Warm Yellow (Highlighting Elements)
+
+$background: #FDF6EC; // Background Light Beige
+$text: #333333; // Text Dark Gray:
+
+$primary: $darkGreen;
+$secondary: $warmBeige;
+
+$dark: #131524;
+$light: #FDF6EC;
 
 // Accordion overrides
 $accordion-icon-color: $primary;

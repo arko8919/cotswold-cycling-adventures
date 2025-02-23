@@ -1,0 +1,61 @@
+@use '../helpers/index' as *;
+
+.overview {
+  background-image: url('../assets/cotswold_landscape.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+
+.main-header {
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+
+  @include breakpoint-up(md) {
+    width: 40vw;
+  }
+
+  h1 {
+    color: $yellow;
+
+  }
+
+  p {
+    color: $light;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center; // Aligns text and arrow properly
+    justify-content: center; // Centers content inside the button
+    align-self: flex-start;
+    font-size: large;
+    font-weight: bold;
+    background-color: $yellow;
+    color: $light;
+    border-radius: 3rem;
+    padding: 10px 20px;
+    width: auto;
+    position: relative;
+    text-decoration: none;
+    margin-left: 1rem;
+
+    &::after {
+      content: "➜"; // Arrow
+      margin-left: 8px; // Space between text and arrow
+      font-size: 1.2em;
+      line-height: 1; // Ensures it stays aligned with text
+      display: inline-block; // Prevents any unexpected shifting
+    }
+  }
+
+}
+
+#adventures {
+
+  @include breakpoint-up(md) {}
+
+}

@@ -4,6 +4,9 @@ class APIFeatures {
     this.queryString = queryString;
   }
 
+  // query - All documents or one documents with specified ID from database
+  // queryStrong - query parameters
+
   // Method is used to retrieve documents
   // that match a certain condition. User.find({ role: "admin" })
   filter() {
@@ -12,7 +15,8 @@ class APIFeatures {
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // 1B) Advanced filtering ( minAge=18 )
+    // Converts query operators (gte, gt, lte, lt) into
+    // MongoDB format by adding $, then applies the filter to the query.
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 

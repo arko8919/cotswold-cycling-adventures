@@ -16,12 +16,13 @@ const reviewSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    // Each review documents know exactly what adventure it belongs.
     adventure: {
       type: mongoose.Schema.ObjectId,
       ref: 'Adventure',
       required: [true, 'Review must belong to a adventure'],
     },
-
+    // Each review documents know exactly to which user it belongs.
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
@@ -29,16 +30,17 @@ const reviewSchema = new mongoose.Schema(
     },
   },
   {
-    // -If we have virtual property, field that is not stored in the
-    // database but calculated using some other value we want it to show
-    // whenever there is output
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
 
+// Ensures a user can only leave one review per tour by
+// enforcing a unique combination of tour and user.
 reviewSchema.index({ adventure: 1, user: 1 }, { unique: true });
 
+// Automatically populates the user field in reviews
+// with the user's name and photo before executing any find query.
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
@@ -48,26 +50,34 @@ reviewSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Calculates the average rating and total number of reviews for an adventure.
+// Updates the adventure's ratingsQuantity and ratingsAverage fields based on the latest review data.
+// If no reviews exist, sets default values (ratingsQuantity: 0, ratingsAverage: 4.5).
 reviewSchema.statics.calcsAverageRatings = async function (adventureId) {
   const stats = await this.aggregate([
     {
+      // Selects only reviews where adventure matches the given adventureId
       $match: { adventure: adventureId },
     },
     {
       $group: {
-        _id: '$adventure',
-        nRating: { $sum: 1 },
-        avgRating: { $avg: '$rating' },
+        _id: '$adventure', // Groups reviews by adventure ID
+        nRating: { $sum: 1 }, // Counts number of reviews for the adventure
+        avgRating: { $avg: '$rating' }, // Calculates the average rating
       },
     },
   ]);
 
+  // Finds a adventure document by its _id (adventureId).
+  // Updates the ratingsQuantity (number of reviews).
+  // Updates the ratingsAverage (average rating score).
   if (stats.length > 0) {
     await Adventure.findByIdAndUpdate(adventureId, {
       ratingsQuantity: stats[0].nRating,
       ratingsAverage: stats[0].avgRating,
     });
   } else {
+    // default
     await Adventure.findByIdAndUpdate(adventureId, {
       ratingsQuantity: 0,
       ratingsAverage: 4.5,
@@ -75,17 +85,27 @@ reviewSchema.statics.calcsAverageRatings = async function (adventureId) {
   }
 };
 
+// After saving a review, recalculates the average rating and total
+// number of reviews for the associated adventure.
+// This ensures real-time updates whenever reviews are added or removed.
+// this.constructor Refers to the model that created this document (Review model)
 reviewSchema.post('save', function () {
   this.constructor.calcsAverageRatings(this.adventure);
 });
 
+// Before executing a findOneAndUpdate or findOneAndDelete query,
+// retrieves the current review document and stores it in this.currentDocument for later use.
 reviewSchema.pre(/^findOneAnd/, async function (next) {
-  this.r = await this.findOne();
+  this.currentDocument = await this.findOne();
   next();
 });
 
+// After updating or deleting a review,
+// recalculates the average rating and total number of reviews for the associated adventure.
 reviewSchema.post(/^findOneAnd/, async function () {
-  await this.r.constructor.calcsAverageRatings(this.r.adventure);
+  await this.currentDocument.constructor.calcsAverageRatings(
+    this.currentDocument.adventure,
+  );
 });
 
 const Review = mongoose.model('Review', reviewSchema);

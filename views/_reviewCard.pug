@@ -1,0 +1,16 @@
+mixin reviewCard(review)
+  .card.review-card.shadow-sm.p-4
+    .card-body
+      .d-flex.align-items-center.mb-3
+        img.rounded-circle.me-3(src=`/assets/users/${review.user.photo}`, alt=`${review.user.name}`, width="50", height="50")
+        .review-info
+          h5.mb-0= review.user.name
+          small.text-muted= new Date(review.createdAt).toLocaleDateString('en-UK', { month: 'long', year: 'numeric' })
+      
+      p.card-text.text-muted= review.review
+      
+      .rating.mt-3
+        each star in Array.from({ length: review.rating })
+          i.fas.fa-star.text-warning
+        each empty in Array.from({ length: 5 - review.rating })
+          i.far.fa-star.text-muted

@@ -1,0 +1,141 @@
+@use '../helpers/index' as *;
+
+// Description container
+.section-description {
+  h2 {
+    font-size: 1.75rem;
+    margin-bottom: 20px;
+    color: $darkGreen;
+    text-align: center;
+    border-bottom: 1px dotted $dark;
+  }
+
+  // Adventure escorts
+  .card {
+    border: none;
+
+    .card-title {
+      font-size: 1rem;
+    }
+
+    .card-img-top {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+    }
+  }
+}
+
+// Adventure overview
+.description {
+  p {
+    color: $darkGreen;
+
+  }
+}
+
+
+// Rating and Reviews Score
+.rating-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* Adjust spacing */
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #222;
+  background: $light;
+  /* Light background */
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.rating-icon {
+  color: $yellow;
+  font-size: 1.2rem;
+}
+
+.rating-box strong {
+  color: $yellow;
+  /* Orange to highlight the rating */
+  font-size: 1.3rem;
+}
+
+.rating-box::after {
+  content: '⭐';
+  font-size: 1.2rem;
+  color: gold;
+}
+
+// Gallery
+.section-pictures img {
+  transition: transform 0.3s ease-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.section-map {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+
+
+}
+
+
+// Reviews
+.section-reviews {
+  text-align: center;
+
+  .carousel {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .carousel-indicators {
+    button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: $green;
+    }
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    filter: invert(50%);
+  }
+
+  .review-card {
+    background: white;
+    border-radius: 10px;
+    max-width: 500px;
+    height: 20rem;
+    text-align: left;
+
+    .review-info {
+      h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+      }
+
+      small {
+        font-size: 0.9rem;
+      }
+    }
+
+    img {
+      border: 2px solid #ddd;
+      object-fit: cover;
+    }
+
+    .rating {
+      i {
+        font-size: 1.2rem;
+      }
+    }
+  }
+}

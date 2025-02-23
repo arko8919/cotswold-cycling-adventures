@@ -1,0 +1,61 @@
+@use '../helpers/index' as *;
+
+.footer {
+  background-color: $light; // Use the color from _custom.scss
+  color: white;
+  padding: 30px 0;
+  border-top: 3px solid $dark; // Accent border for a premium look
+
+  .footer-logo {
+    height: 50px;
+  }
+
+  .footer-links {
+    font-size: 1rem;
+
+    .list-inline-item {
+      a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+        &:hover {
+          color: $dark;
+        }
+      }
+    }
+  }
+
+  .footer-socials {
+    a {
+      font-size: 1.2rem;
+      color: white;
+      transition: transform 0.3s ease, color 0.3s ease;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+
+      &:hover {
+        transform: scale(1.2);
+        color: $dark;
+      }
+    }
+  }
+
+  .footer-text {
+    font-size: 0.9rem;
+    color: #ddd;
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    .footer-links {
+      font-size: 0.9rem;
+      gap: 10px;
+    }
+
+    .footer-socials a {
+      font-size: 1rem;
+    }
+  }
+}

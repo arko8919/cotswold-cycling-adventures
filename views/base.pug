@@ -1,22 +1,28 @@
 doctype html
 html
-    head 
-        meta(charset='UTF-8' )
-        meta(name='viewport' content='width=device-width, initial-scale=1.0') 
-        link(rel='shortcut icon', type='image/png' href='/img/favicon.png')
-        link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Lato:300,300i,700')
-        script(defer src="bundle07296fc59b00c4bc1654.js")
+  head 
+    block head
+      meta(charset='UTF-8' )
+      meta(name='viewport' content='width=device-width, initial-scale=1.0') 
+      link(rel='stylesheet' href='/css/style.css')
+      link(rel='shortcut icon', type='image/png' href='/img/favicon.png')       
+      link(href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet")
+      link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css")
+      
 
-        title Cotswold Adventures Cycling | #{title}
-    body
-        //- ctrl + a / ctrl + shift + p / < pug
-        // HEADER
-        include _header
+      title Cotswold Adventures Cycling | #{title}
+  body
+    //- ctrl + a / ctrl + shift + p / < pug
+    // NAV
+    include _nav
 
-        // CONTENT
-        block content
+    // CONTENT
+    block content
 
-        // FOOTER
-        include _footer
- 
+    // FOOTER
+    include _footer
+
+    script(src="https://js.stripe.com/v3/")
+    script( src='/js/bundle.js')
+
 

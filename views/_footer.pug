@@ -1,15 +1,29 @@
+footer.footer.text-center.py-4
+  .container
+    // Logo
+    img.footer-logo.mb-3(src='/assets/logo-small.png', alt='Cotswold Cycling Adventures Logo', height='50')
 
-footer.bg-light.text-center.py-3
-    img.mb-2(src='assets/logo.png', alt='cotswold cycling adventure logo', height='40')
-    ul.list-inline
-        li.list-inline-item
-            a.text-decoration-none(href='#') About us
-        li.list-inline-item
-            a.text-decoration-none(href='#') Download apps
-        li.list-inline-item
-            a.text-decoration-none(href='#') Become a guide
-        li.list-inline-item
-            a.text-decoration-none(href='#') Careers
-        li.list-inline-item
-            a.text-decoration-none(href='#') Contact
-    p &copy; by Artur Sas Dunajewski. All rights reserved.
+    // Navigation Links
+    ul.footer-links.list-inline.d-flex.flex-wrap.justify-content-center.gap-4.mb-3
+      li.list-inline-item
+        a.text-decoration-none.fw-bold(href='#') About Us
+      li.list-inline-item
+        a.text-decoration-none.fw-bold(href='#') Career
+      li.list-inline-item
+        a.text-decoration-none.fw-bold(href='#') Blog
+      li.list-inline-item
+        a.text-decoration-none.fw-bold(href='#') Contact Us
+
+    // Social Media Icons
+    .footer-socials.d-flex.justify-content-center.gap-3.mb-3
+      a(href='#')
+        i.fab.fa-facebook-f
+      a(href='#')
+        i.fab.fa-instagram
+      a(href='#')
+        i.fab.fa-twitter
+      a(href='#')
+        i.fab.fa-youtube
+
+    // Copyright
+    p.footer-text.text-muted.mb-0 &copy; 2025 Cotswold Cycling Adventures. All rights reserved.

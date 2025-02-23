@@ -1,0 +1,29 @@
+extends base
+
+block content
+  main.container.my-5
+    .row.row-cols-1.row-cols-md-3.g-4
+      each adventure in adventures
+        .col
+          .card.h-100
+            img.card-img-top(
+              alt= `${adventure.name}`
+              src= `/assets/adventures/${adventure.imageCover}`
+              )
+            .card-body
+              h5.card-title= `${adventure.difficulty} ${adventure.duration}-day adventure`
+              p.card-text= adventure.summary
+              ul.list-unstyled
+                li
+                  strong= adventure.startLocation.description
+                li
+                  strong= adventure.startDates[0].toLocaleString('en-uk', {month: 'long', year: 'numeric'})                 
+                li
+                  strong= `${adventure.locations.length} stops`
+                li
+                  strong= `${adventure.maxGroupSize} people`
+
+            .card-footer.d-flex.justify-content-between.align-items-center
+              span= `$${adventure.price} per person` 
+              span= `${adventure.ratingsAverage} rating (${adventure.ratingsQuantity})`
+              a.btn.btn-primary(href=`/adventure/${adventure.slug}`) Details            

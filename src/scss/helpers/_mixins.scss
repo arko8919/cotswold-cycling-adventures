@@ -19,3 +19,39 @@
     transition-duration: 1000ms;
     transition-property: all;
 }
+
+// Define Bootstrap 5 breakpoints
+$breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px
+);
+
+// Mixin for "min-width" (styles apply for this size and larger)
+@mixin breakpoint-up($size) {
+    @if map-has-key($breakpoints, $size) {
+        @media (min-width: map-get($breakpoints, $size)) {
+            @content;
+        }
+    }
+
+    @else {
+        @warn "Invalid breakpoint: #{$size}. Choose from xs, sm, md, lg, xl, xxl.";
+    }
+}
+
+// Mixin for "max-width" (styles apply for this size and smaller)
+@mixin breakpoint-down($size) {
+    @if map-has-key($breakpoints, $size) {
+        @media (max-width: (map-get($breakpoints, $size) - 1)) {
+            @content;
+        }
+    }
+
+    @else {
+        @warn "Invalid breakpoint: #{$size}. Choose from xs, sm, md, lg, xl, xxl.";
+    }
+}

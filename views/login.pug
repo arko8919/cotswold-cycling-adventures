@@ -1,0 +1,26 @@
+extends base
+
+block content
+  .container.login
+    .login-card
+      h2.text-center Login to Cotswold Cycling Adventures
+
+      form.form-login(action="/login" method="POST")
+        .form-group
+          label(for="email") Email address
+          input#email.form-control(type="email" aria-describedby="emailHelp" placeholder="Enter email", required)
+          small#emailHelp.form-text.text-muted We'll never share your email with anyone else.
+
+        .form-group
+          label(for="password") Password
+          input#password.form-control(type="password" placeholder="••••••••", required, minlength='8')
+
+        .form-group.form-check
+          input#check.form-check-input(type="checkbox")
+          label.form-check-label(for="check") Remember me
+
+        button.btn.btn-primary.w-100(type="submit") Submit
+
+      .text-center.mt-3
+        | Don't have an account? 
+        a(href="/signup").fw-bold Sign Up

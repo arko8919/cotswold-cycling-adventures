@@ -1,1 +1,44 @@
-extend base
+extends base
+
+block content
+  main.overview
+    .container
+      .row.main-header
+        h1 Cotswold Cycling Adventures
+        p Ride through the Cotswolds' rolling hills, charming villages, and quiet lanes. Enjoy scenic climbs, historic landscapes, and classic English charm on two wheels.
+        a(href='#adventures') Experience the Cotswold
+      .row.row-cols-1.row-cols-md-3.g-4#adventures
+        each adventure in adventures
+          .col-12
+            .card.h-100       
+              img.card-img-top(
+                alt= `${adventure.name}`
+                src= `/assets/adventures/${adventure.imageCover}`
+                )
+              .card-body
+                h5.card-title= adventure.name
+                p.card-subtitle= `${adventure.difficulty} ${adventure.duration}-day adventure`
+                p.card-text= adventure.summary
+                ul.adventure-details.list-unstyled
+                  li.d-flex.align-items-center.gap-2
+                    i.fas.fa-map-marker-alt  
+                    span= adventure.startLocation.description
+
+                  li.d-flex.align-items-center.gap-2
+                    i.fas.fa-calendar-alt
+                    span= adventure.startDates[0].toLocaleString('en-uk', {month: 'long', year: 'numeric'})
+
+                  li.d-flex.align-items-center.gap-2
+                    i.fas.fa-road
+                    span= `320km distance`
+
+                  li.d-flex.align-items-center.gap-2
+                    i.fas.fa-user
+                    span= `${adventure.maxGroupSize} people`
+              .card-footer
+                .row.d-flex.justify-content-between.align-items-center
+                  .col-5
+                    strong £#{adventure.price}
+                    |  per person   
+                  .col-7
+                    a.btn(href=`/adventure/${adventure.slug}`) Details            

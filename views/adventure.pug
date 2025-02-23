@@ -1,1 +1,103 @@
-h1 test
+extends base
+include _reviewCard
+
+block append head 
+  script(src='https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js')
+  link(href='https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css' rel='stylesheet')
+
+block content
+  //- Header Section
+  header.section-header.container-lg-fluid 
+    .row.g-4
+      .col-md-12
+        img.header-img.img-fluid.shadow-lg(src=`/assets/adventures/${adventure.imageCover}`, alt=`${adventure.name}`)
+      .col.shadow-lg.details
+        h1.display-4= `${adventure.name}: ${adventure.startLocation.description}`
+        span.rating-box
+          strong= adventure.ratingsAverage
+          i.fas.fa-star.rating-icon
+          |  (#{adventure.ratingsQuantity} reviews)
+        ul.list-group.list-group-flush.rounded.mt-3
+          - const date = adventure.startDates[0].toLocaleString('en-uk', {month: 'long', year: 'numeric'})
+          li.list-group-item.fw-bold 
+            i.fas.fa-stopwatch.me-3
+            | Duration: #{adventure.duration} days
+          li.list-group-item.fw-bold 
+            i.fas.fa-calendar-alt.me-3
+            | Next date: #{date}
+          li.list-group-item.fw-bold
+            i.fas.fa-tachometer-alt.me-3
+            | Difficulty: #{adventure.difficulty}
+          li.list-group-item.fw-bold
+            i.fas.fa-users.me-3
+            | Riders: #{adventure.maxGroupSize} cyclist
+          li.list-group-item.fw-bold
+            i.fas.fa-road.me-3
+            | Distance:  #{adventure.distance} miles
+          li.list-group-item.fw-bold
+            i.fas.fa-flag.me-3
+            | #{adventure.locations.length} stops
+          li.list-group-item.fw-bold.btn-header
+            if user   
+              button.btn.btn-lg.mt-3#book-adventure(data-adventure-id=`${adventure.id}`) Book adventure now!
+            else  
+              a.btn.btn-lg.mt-3(href='/login') Log in to book adventure!
+
+
+  main.container
+    //- Adventure escorts and description
+    section.section-description.container.my-5.rounded-4
+      .row.g-4
+        .col-md-6
+          h2 Adventure escort 
+          .row.row-cols-1.row-cols-md-2.g-3
+            each guide in adventure.guides
+              .col
+                .card.shadow-lg.text-center
+                  img.card-img-top.rounded-circle.mx-auto.mt-3(src=`/assets/users/${guide.photo}`, alt=`${guide.name}`, width="60", height="60")
+                  .card-body
+                    p.card-title.fw-bold= guide.name
+                    p.card-text.text-muted 
+                      - if(guide.role === 'lead-guide')
+                        | Ride Captain
+                      - else 
+                        | Spinmaster
+        .col-md-6.description
+          h2 Overview
+          - const paragraphs = adventure.description.split('\n')
+          each p in paragraphs
+            p.lead= p
+
+    //- Adventure Images Section
+    section.section-pictures.container.my-5
+      .row.g-3
+        each img, i in adventure.images 
+          .col-md-4
+            img.img-fluid.rounded.shadow-sm(src=`/assets/adventures/${img}`, alt=`Adventure image`)
+
+    //- Map Section
+    section.section-map.container.my-5
+      #map(data-locations=`${JSON.stringify(adventure.locations)}`)        
+
+    //- Reviews Section
+    section.section-reviews.container.my-5
+      h2.mb-4.text-center.text-success Customer Reviews
+
+      .carousel.slide(id="reviewCarousel" data-bs-ride="carousel")
+        // Indicators
+        .carousel-indicators
+          each review, index in adventure.reviews
+            button(type="button", data-bs-target="#reviewCarousel", data-bs-slide-to=index, class=(index === 0 ? "active" : ""), aria-label=`Slide ${index + 1}`)
+
+        // Carousel Items
+        .carousel-inner
+          each review, index in adventure.reviews
+            .carousel-item(class=(index === 0 ? "active" : ""))
+              .d-flex.justify-content-center
+                +reviewCard(review)
+
+        // Navigation Controls
+        button.carousel-control-prev(type="button", data-bs-target="#reviewCarousel", data-bs-slide="prev")
+          span.carousel-control-prev-icon(aria-hidden="true")
+        button.carousel-control-next(type="button", data-bs-target="#reviewCarousel", data-bs-slide="next")
+          span.carousel-control-next-icon(aria-hidden="true")

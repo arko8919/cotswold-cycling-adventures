@@ -1,0 +1,93 @@
+@use '../helpers/index' as *;
+
+// Container
+.section-header {
+  position: relative;
+  text-align: center;
+  font-weight: 900;
+  margin: 0;
+  padding: 0;
+
+  // Header Image
+  .header-img {
+
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+
+    @include breakpoint-up(md) {
+      width: 100vw;
+      height: 100vh;
+    }
+
+  }
+
+  // Container for header list and heading
+  .details {
+    margin-top: 0;
+
+    @include breakpoint-up(md) {
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: center;
+      align-items: center;
+      width: 50vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      margin-top: 24px;
+
+    }
+
+    // Main Heading
+    h1 {
+      padding-top: 1rem;
+      color: $yellow;
+
+    }
+  }
+
+  // List on a header
+  .list-group {
+    text-align: start;
+
+    @include breakpoint-up(md) {
+      width: 80%;
+    }
+  }
+
+  // List items
+  .list-group-item {
+    font-size: 1.1rem;
+    padding: 12px;
+    background-color: $light;
+    color: $grey-600;
+    border-style: dotted;
+
+    @include breakpoint-up(md) {
+      background-color: rgba(0, 0, 0, 0);
+      color: $light;
+    }
+
+    i {
+      color: $darkGreen;
+
+      @include breakpoint-up(md) {
+        color: $light;
+      }
+    }
+
+
+  }
+
+  // Button on a header
+  .btn-header {
+    text-align: center;
+
+    button,
+    a {
+      color: $yellow;
+      border-bottom: 3px solid $yellow;
+    }
+  }
+}
