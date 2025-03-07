@@ -35,7 +35,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
             name: `${adventure.name} Adventure`,
             description: adventure.summary,
             images: [
-              `${req.protocol}://${req.get('host')}/img/adventures/${adventure.imageCover}`,
+              `${req.protocol}://${req.get('host')}/assets/adventures/${adventure.imageCover}`,
             ],
           },
           unit_amount: adventure.price * 100,

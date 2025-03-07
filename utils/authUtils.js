@@ -23,8 +23,9 @@ const createSendToken = (user, statusCode, req, res) => {
     ),
     // Make the cookie accessible only via HTTP (prevents client-side JavaScript access for security)
     httpOnly: true,
-    // Ensure the cookie is sent only over HTTPS when the request is secure
-    secure: req.secure || req.headers('x-forwarded-proto') === 'https',
+    // Ensures the cookie is only sent over HTTPS by checking if the request is secure
+    // or if the 'x-forwarded-proto' header indicates an HTTPS connection (useful for proxies).
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   });
 
   // Remove password from output

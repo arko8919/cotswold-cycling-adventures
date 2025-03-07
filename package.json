@@ -4,7 +4,7 @@
   "description": "Bike adventures in Cotswold",
   "main": "app.js",
   "scripts": {
-    "start:prod": "SET NODE_ENV=production && nodemon server.js",
+    "prod": "SET NODE_ENV=production && nodemon server.js",
     "debug": "ndb server.js",
     "build:sass": "sass --quiet src/scss/main.scss public/css/style.css",
     "watch:sass": "npx chokidar \"src/scss/**/*.scss\" --initial --ignoreInitial --verbose -c \"npm run build:sass\"",

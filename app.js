@@ -14,7 +14,7 @@ const cors = require('cors');
 
 // Error Handling
 const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
 // Routes
 const adventureRouter = require('./routes/adventureRoutes');
@@ -26,8 +26,10 @@ const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
-app.enable('trust proxy');
-//app.set('trust proxy', false);
+// Enable 'trust proxy' to ensure Express correctly detects client IPs and protocols
+// when running behind a reverse proxy (e.g., Nginx, Cloudflare, or a load balancer).
+//app.enable('trust proxy');
+app.set('trust proxy', false);
 
 // Sets Pug as the template engine for rendering dynamic HTML views.
 app.set('view engine', 'pug');
@@ -42,8 +44,6 @@ app.use(cors());
 // Enable CORS pre-flight requests for all routes, allowing browsers to send
 // an OPTIONS request before making certain types of requests (e.g., PUT, DELETE).
 app.options('*', cors());
-
-////////  GLOBAL MIDDLEWARES ////////
 
 // Serves static files (CSS, images, JavaScript) from the 'public' directory,
 //  enabling access to assets in the frontend.
@@ -66,7 +66,10 @@ const limiter = rateLimit({
 //  protecting against excessive requests and potential denial-of-service attacks.
 app.use('/api', limiter);
 
-// We use it here as we need body in raw form ( as string not JSON )
+// Handle incoming POST requests to the '/webhook-checkout' endpoint.
+// 1. Use `express.raw({ type: 'application/json' })` to parse the request body as raw JSON data.
+//    - This is required for Stripe webhooks since they send raw payloads with a signature for verification.
+// 2. Pass the parsed request body to `bookingController.webhookCheckout`, which processes the webhook event.
 app.post(
   '/webhook-checkout',
   express.raw({ type: 'application/json' }),
@@ -76,10 +79,6 @@ app.post(
 // Parses incoming JSON requests with a size limit of 10KB to prevent
 //  excessive data payloads and enhance security.
 app.use(express.json({ limit: '10kb' }));
-
-// Parses URL-encoded data with extended support for rich objects and arrays,
-//  limiting payload size to 10KB for security.
-//app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Parses cookies from incoming requests,
 //  allowing easy access to stored client-side data.
@@ -94,8 +93,7 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // Enhances security by setting HTTP headers with Helmet, including a strict
-//  Content Security Policy (CSP) to control allowed sources for scripts, styles, fonts, images,
-// and network connections while supporting Mapbox and other necessary services.
+//  Content Security Policy (CSP) to control allowed sources for scripts, styles, fonts, images
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -187,6 +185,6 @@ app.all('*', (req, res, next) => {
 
 // Uses a centralized error-handling middleware to manage and format
 // all application errors consistently.
-app.use(globalErrorHandler);
+app.use(errorMiddleware);
 
 module.exports = app;
