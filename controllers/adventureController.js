@@ -1,5 +1,4 @@
 const Adventure = require('../models/adventureModel');
-const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const {

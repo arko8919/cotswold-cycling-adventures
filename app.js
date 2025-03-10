@@ -183,8 +183,7 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-// Uses a centralized error-handling middleware to manage and format
-// all application errors consistently.
+// Error-handling middleware to manage and format all application errors
 app.use(errorMiddleware);
 
 module.exports = app;

@@ -1,6 +1,6 @@
 /////// ERROR DEVELOPMENT ///////
 const sendErrorDev = (err, req, res) => {
-  // Mask Stack Trace for Security in Dev API Errors
+  // Mask stack trace for security in dev API errors
   const safeStack = process.env.SHOW_STACK_TRACE === 'true' ? err.stack : null;
   //  Handle API Errors
   if (req.originalUrl.startsWith('/api')) {
