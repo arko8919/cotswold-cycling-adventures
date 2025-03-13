@@ -3,14 +3,6 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const { filterObj } = require('../utils/userUtils');
-const {
-  uploadUserPhoto,
-  resizeUserPhoto,
-} = require('../middlewares/uploadMiddleware');
-
-////////////////////// USER IMAGE UPLOAD MIDDLEWARES ////////////////////////
-exports.uploadUserPhoto = uploadUserPhoto;
-exports.resizeUserPhoto = resizeUserPhoto;
 
 // "/me" endpoint
 // Is good practice to implement a slash me endpoint in any API.

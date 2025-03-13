@@ -13077,12 +13077,6 @@ if (userDataForm) userDataForm.addEventListener('submit', function (e) {
   form.append('name', document.getElementById('name').value);
   form.append('email', document.getElementById('email').value);
   form.append('photo', document.getElementById('photo').files[0]);
-
-  // If we just update without files
-  // const name = document.getElementById('name').value;
-  // const email = document.getElementById('email').value;
-  // updateSettings( { name, email }, 'data');
-
   (0, _updateSettings.updateSettings)(form, 'data');
 });
 if (userPasswordForm) userPasswordForm.addEventListener('submit', /*#__PURE__*/function () {
@@ -13092,9 +13086,6 @@ if (userPasswordForm) userPasswordForm.addEventListener('submit', /*#__PURE__*/f
       while (1) switch (_context.prev = _context.next) {
         case 0:
           e.preventDefault();
-          //document.querySelector('.btn--save-password').textContent = 'Updating...';
-
-          //document.querySelector('.btn--save-password').value = 'Updating...';
           passwordCurrent = document.getElementById('password-current').value;
           password = document.getElementById('password').value;
           passwordConfirm = document.getElementById('password-confirm').value;
@@ -13151,7 +13142,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52788" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50966" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

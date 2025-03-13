@@ -3,6 +3,10 @@ const express = require('express');
 const adventureController = require('../controllers/adventureController');
 const authController = require('../controllers/authController');
 const reviewRouter = require('./reviewRoutes');
+const {
+  uploadAdventureImages,
+  resizeAdventureImages,
+} = require('../middlewares/uploadMiddleware');
 
 const router = express.Router();
 
@@ -64,8 +68,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'),
-    adventureController.uploadAdventureImages,
-    adventureController.resizeAdventureImages,
+    uploadAdventureImages,
+    resizeAdventureImages,
     adventureController.updateAdventure,
   )
   .delete(

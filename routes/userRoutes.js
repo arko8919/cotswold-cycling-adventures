@@ -1,6 +1,10 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
+const {
+  uploadUserPhoto,
+  resizeUserPhoto,
+} = require('../middlewares/uploadMiddleware');
 
 const router = express.Router();
 
@@ -16,11 +20,10 @@ router.use(authController.protect);
 
 router.patch('/updateMyPassword', authController.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
-//  Accepts a single file upload with the field name 'photo'
 router.patch(
   '/updateMe',
-  userController.uploadUserPhoto,
-  userController.resizeUserPhoto,
+  uploadUserPhoto,
+  resizeUserPhoto,
   userController.updateMe,
 );
 

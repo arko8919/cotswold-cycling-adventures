@@ -38,20 +38,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please confirm your password'],
 
-    //  Important: This validation only works when **creating** (`User.create(req.body)`)
-    // or **saving** (`user.save()`). It does **not** work on `findOneAndUpdate()` or `update()`.
-    //
-    // Why? Mongoose validators run only on `.create()` and `.save()`, but **not on updates**
-    // unless you explicitly call `.save()` after updating the document.
-    //
-    // What does this validator do?
-    // - It checks if the `passwordConfirm` field matches the `password` field.
-    // - If `passwordConfirm !== password`, validation **fails** and returns an error message.
-    //
-    // - `el` represents the value of `passwordConfirm`
-    // - `this.password` refers to the password entered by the user.
-
     validate: {
+      //It checks if the `passwordConfirm` field matches the `password` field.
       validator: function (el) {
         return el === this.password;
       },
@@ -80,7 +68,8 @@ userSchema.pre('save', async function (next) {
   // "bcrypt" algorithm will salt and then hash password to make it strong against brute force attack
   this.password = await bcrypt.hash(this.password, 12);
 
-  // delete passwordConfirm field. We need it only for validation when creating user
+  // Delete passwordConfirm field.
+  // We only need it temporarily for validation of password on create or update.
   this.passwordConfirm = undefined;
   next();
 });
@@ -111,17 +100,12 @@ userSchema.methods.correctPassword = async function (
   const result = await bcrypt.compare(candidatePassword, userPassword);
 
   return result;
-  // return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 // Checks if the user changed their password after the JWT was issued.
 // If passwordChangedAt exists, converts it to a timestamp and compares it with the token's timestamp.
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
-    // parseInt(string, radix) is a built-in function used to convert a string into an integer
-    // string: The value to be converted. radix (optional): The base (2-36) of the numerical system to be used.
-    // getTime() is a method of the Date object that returns the number of milliseconds since January 1, 1970 (UTC), also known as the Unix timestamp
-    // getTime() --> convert to timestamp, divided by 1000, parse as integer, base is 10
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
       10,
@@ -133,9 +117,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
-// Generates a password reset token and stores its hashed version in the database.
-// Sets an expiration time of 10 minutes.
-// Returns the plain reset token to be sent to the user.
 // - Reset tokens are a way less dangerous attack vector that why we use build in crypto module
 userSchema.methods.createPasswordResetToken = function () {
   // randomBytes(numbers_of_characters).toString('hex'); convert to hexadecimal string
@@ -149,7 +130,7 @@ userSchema.methods.createPasswordResetToken = function () {
   // We just modify the data, but we didn't save it
   // We need to expire token after some time for security
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
+  // Returns the plain reset token to be sent to the user.
   return resetToken;
 };
 

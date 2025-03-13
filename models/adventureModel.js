@@ -92,15 +92,6 @@ const adventureSchema = new mongoose.Schema(
         enum: ['Point'],
       },
       coordinates: [Number],
-      //  Coordinates Format in Geospatial Data
-      // - In MongoDB and GeoJSON, coordinates must be in the format: **[longitude, latitude]**.
-      // - This is different from the usual convention where latitude comes first (latitude, longitude).
-      // - **Latitude** (horizontal) measures distance **north or south** of the equator (0°).
-      //   - Ranges from **-90° (South Pole) to 90° (North Pole)**.
-      // - **Longitude** (vertical) measures distance **east or west** of the Prime Meridian (0°).
-      //   - Ranges from **-180° (west) to 180° (east)**, with 0° passing through Greenwich, UK.
-      // -  This format may feel counterintuitive, but it's required for geospatial queries in MongoDB.
-
       address: String,
       description: String,
     },

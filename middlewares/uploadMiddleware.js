@@ -56,7 +56,7 @@ exports.uploadAdventureImages = upload.fields([
 exports.resizeAdventureImages = catchAsync(async (req, res, next) => {
   if (!req.files.imageCover || !req.files.images) return next();
 
-  // Cover image
+  // Cover image filename
   req.body.imageCover = `adventure-${req.params.id}-${Date.now()}-cover.jpeg`;
   // Handle image upload and processing:
   await sharp(req.files.imageCover[0].buffer)

@@ -4,8 +4,8 @@ class APIFeatures {
     this.queryString = queryString;
   }
 
-  // query - All documents or one documents with specified ID from database
-  // queryStrong - query parameters
+  // query - All documents or one document with specified ID from database
+  // queryString - query parameters
 
   // Method is used to retrieve documents
   // that match a certain condition. User.find({ role: "admin" })

@@ -43,20 +43,13 @@ if (userDataForm)
     form.append('email', document.getElementById('email').value);
     form.append('photo', document.getElementById('photo').files[0]);
 
-    // If we just update without files
-    // const name = document.getElementById('name').value;
-    // const email = document.getElementById('email').value;
-    // updateSettings( { name, email }, 'data');
-
     updateSettings(form, 'data');
   });
 
 if (userPasswordForm)
   userPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    //document.querySelector('.btn--save-password').textContent = 'Updating...';
 
-    //document.querySelector('.btn--save-password').value = 'Updating...';
     const passwordCurrent = document.getElementById('password-current').value;
     const password = document.getElementById('password').value;
     const passwordConfirm = document.getElementById('password-confirm').value;

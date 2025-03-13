@@ -1,24 +1,8 @@
 const Adventure = require('../models/adventureModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
-const {
-  getAdventureStats,
-  getMonthlyPlan,
-} = require('../services/adventureService');
-
-const {
-  uploadAdventureImages,
-  resizeAdventureImages,
-} = require('../middlewares/uploadMiddleware');
-
-const {
-  getAdventuresWithin,
-  getDistances,
-} = require('../services/adventureGeoService');
-
-////////////////////// ADVENTURE IMAGE UPLOAD MIDDLEWARES ////////////////////////
-exports.uploadAdventureImages = uploadAdventureImages;
-exports.resizeAdventureImages = resizeAdventureImages;
+const adventureService = require('../services/adventureService');
+const adventureGeoService = require('../services/adventureGeoService');
 
 ////////////////////// ALIAS /////////////////////////////////////////
 exports.aliasTopAdventures = (req, res, next) => {
@@ -38,30 +22,30 @@ exports.deleteAdventure = factory.deleteOne(Adventure);
 
 ////////////////////// BUSINESS LOGIC CONTROLLERS ////////////////////////
 // Get Adventure Statistics
-exports.getAdventureStats = catchAsync(async (req, res, next) => {
-  const stats = await getAdventureStats();
-  res.status(200).json({
-    status: 'success',
-    results: stats.length,
-    data: { stats },
-  });
+exports.getAdventureStats = catchAsync(async (req, res) => {
+  const stats = await adventureService.getAdventureStats();
+  res
+    .status(200)
+    .json({ status: 'success', results: stats.length, data: { stats } });
 });
 
 // Get Monthly Plan for a Given Year
-exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
-  const plan = await getMonthlyPlan(req.params.year * 1);
-  res.status(200).json({
-    status: 'success',
-    results: plan.length,
-    data: { plan },
-  });
+exports.getMonthlyPlan = catchAsync(async (req, res) => {
+  const year = parseInt(req.params.year, 10);
+  const plan = await adventureService.getMonthlyPlan(year);
+  res
+    .status(200)
+    .json({ status: 'success', results: plan.length, data: { plan } });
 });
 
 // Controller to get adventures within a specified distance from a location.
-exports.getAdventuresWithin = catchAsync(async (req, res, next) => {
+exports.getAdventuresWithin = catchAsync(async (req, res) => {
   const { distance, latlng, unit } = req.params;
-  const adventures = await getAdventuresWithin(distance, latlng, unit);
-
+  const adventures = await adventureGeoService.getAdventuresWithin(
+    distance,
+    latlng,
+    unit,
+  );
   res.status(200).json({
     status: 'success',
     results: adventures.length,
@@ -71,12 +55,8 @@ exports.getAdventuresWithin = catchAsync(async (req, res, next) => {
 
 // Controller to calculate distances from a given location to all
 //  adventure start points
-exports.getDistances = catchAsync(async (req, res, next) => {
+exports.getDistances = catchAsync(async (req, res) => {
   const { latlng, unit } = req.params;
-  const distances = await getDistances(latlng, unit);
-
-  res.status(200).json({
-    status: 'success',
-    data: { distances },
-  });
+  const distances = await adventureGeoService.getDistances(latlng, unit);
+  res.status(200).json({ status: 'success', data: { distances } });
 });
