@@ -8,7 +8,7 @@ exports.alerts = (req, res, next) => {
   const { alert } = req.query;
   if (alert === 'booking')
     res.locals.alert =
-      "Your booking was successful! Please check your email for a confirmation. If your booking doesn't show up here immediatly, please come back later.";
+      "Your booking was successful! Please check your email for a confirmation. If your booking doesn't show up here immediately, please come back later.";
   next();
 };
 
@@ -50,8 +50,31 @@ exports.getLoginForm = (req, res, next) => {
 };
 
 exports.getAccount = (req, res, next) => {
+  const section = req.params.section || 'settings'; // Default section
+
+  // Define allowed sections
+  const allowedSections = [
+    'settings',
+    'bookings',
+    'reviews',
+    'billing',
+    'manage-adventures',
+    'manage-users',
+    'manage-reviews',
+    'manage-bookings',
+  ];
+
+  // If an invalid section is requested, return a 404 error
+  if (!allowedSections.includes(section)) {
+    return res
+      .status(404)
+      .render('error', { title: 'Error', message: 'Invalid section' });
+  }
+
+  // **Always load the full account page (never replace it)**
   res.status(200).render('account', {
-    title: 'Your account',
+    title: 'Your Account',
+    section, // Pass the section to Pug
   });
 };
 

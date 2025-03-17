@@ -1,0 +1,37 @@
+
+.card.shadow-sm
+  .card-body
+    h2.mb-4 Your Account Settings
+    form.form-user-data        
+      .mb-3
+        label.form-label(for='name') Name
+        input#name.form-control(type='text', value=`${user.name}`, required, name='name')
+
+      .mb-3
+        label.form-label(for='email') Email Address
+        input#email.form-control(type='email', value=`${user.email}`, required, name='email')
+
+      .mb-3.profile-photo
+        img(src=`/assets/users/${user.photo}`, alt='User photo')
+        input.form-control(type='file', accept='image/*', id='photo', name='photo')
+
+      button.btn Save Settings
+
+//- Password Change Section
+.card.shadow-sm.mt-4
+  .card-body
+    h2.mb-4 Password Change
+    form.form-user-password
+      .mb-3
+        label.form-label(for='password-current') Current Password
+        input#password-current.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+      .mb-3
+        label.form-label(for='password') New Password
+        input#password.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+      .mb-3
+        label.form-label(for='password-confirm') Confirm Password
+        input#password-confirm.form-control(type='password', placeholder='••••••••', required, minlength='8')
+
+      button.btn Save Password

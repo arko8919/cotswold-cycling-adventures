@@ -12,7 +12,7 @@ const signToken = (id) =>
 // Also removes the password from the response for security
 // before sending user data in JSON format.
 const createSendToken = (user, statusCode, req, res) => {
-  // Log the user into the application by sending a token.
+  // Create JWT
   const token = signToken(user);
 
   // Set a cookie named 'jwt' with the authentication token
@@ -33,9 +33,9 @@ const createSendToken = (user, statusCode, req, res) => {
 
   res.status(statusCode).json({
     status: 'success',
-    token, // We only want to send token if the user is logged
+    token,
     data: {
-      user,
+      user, // make it more specific in time, which fields we actually need to send
     },
   });
 };

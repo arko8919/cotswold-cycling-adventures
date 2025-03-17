@@ -12,11 +12,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-    passwordChangedAt: req.body.passwordChangedAt,
-    role: req.body.role,
-    // - "role" data shouldn't be here, it is just for testing.
-    // - We should use a compass to edit the role
-    // - We could also add special route just for creating admin
   });
   //// Emails /////
   const url = `${req.protocol}://${req.get('host')}/me`;
@@ -51,7 +46,7 @@ exports.login = catchAsync(async (req, res, next) => {
 //  JWT cookie with a short-lived value and sending a success response.
 exports.logout = (req, res) => {
   res.cookie('jwt', 'logged out', {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(0),
     httpOnly: true,
   });
 

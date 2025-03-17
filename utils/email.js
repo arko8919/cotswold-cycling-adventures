@@ -1,7 +1,4 @@
 /* eslint-disable lines-between-class-members */
-//https://mailtrap.io/?gad_source=1&gclid=CjwKCAiAn9a9BhBtEiwAbKg6fmM-zNmoC8QUs2St10At5nytBn9wJW02VJvEab0W8J-F4maVfT5dpxoCRvEQAvD_BwE
-//https://sendgrid.com/en-us?utm_source=google&utm_medium=cpc&utm_term=sendgrid&utm_campaign=G_S_EMEA_TSG_Brand_T1&cq_plac=&cq_net=g&cq_pos=&cq_med=&cq_plt=gp&gad_source=1&gclid=CjwKCAiAn9a9BhBtEiwAbKg6fiNTERcpK8z5eja8K3atxAcENYYJtJUyvl6Dl_wlpn3gfiqBB1o5URoCV3YQAvD_BwE
-//https://mailsac.com/
 const nodemailer = require('nodemailer');
 const pug = require('pug');
 const { convert } = require('html-to-text');
@@ -11,7 +8,7 @@ module.exports = class Email {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
-    this.from = `Artur SD <${process.env.EMAIL_FROM}>`;
+    this.from = `Artur Sas Dunajewski <${process.env.EMAIL_FROM}>`;
   }
   // Create an email transport configuration:
   // - Uses SendGrid for email delivery in production
@@ -28,7 +25,8 @@ module.exports = class Email {
       });
     }
     // Create an email transport configuration for development or non-production environments:
-    // - Uses custom SMTP settings from environment variables (host, port, authentication)
+    // - Uses custom SMTP (Simple Mail Transfer Protocol) settings
+    // from environment variables (host, port, authentication)
     // - Ensures secure email delivery based on configured credentials
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,

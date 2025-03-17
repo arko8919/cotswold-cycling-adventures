@@ -62,18 +62,16 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   });
-  // If token has not expired, and there is user, set the new password
+
   if (!user) {
     return next(new AppError('Token is invalid or has expired', 400));
   }
 
-  // Updates the user's password, clears the reset token, and removes the expiration time.
-  // We want to validate which why we also want to provide passwordConfirm,
-  //  which is required during validation
-  user.password = req.body.password;
-  user.passwordConfirm = req.body.passwordConfirm;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
+  // If token has not expired, and there is user, set the new password
+  user.password = req.body.password; // Updates the user's password.
+  user.passwordConfirm = req.body.passwordConfirm; //  For validation inside the Mongoose schema
+  user.passwordResetToken = undefined; // Clears the reset token
+  user.passwordResetExpires = undefined; // Removes the expiration time.
 
   await user.save();
   // Log the user in, send JWT to the client

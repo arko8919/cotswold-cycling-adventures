@@ -7,6 +7,7 @@ import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
 import { bookAdventure } from './stripe';
 import { showAlert } from './alerts';
+import { response } from 'express';
 
 // DOM elements
 const mapBox = document.getElementById('map');
@@ -15,6 +16,9 @@ const logOutBtn = document.querySelector('.btn-logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookBtn = document.getElementById('book-adventure');
+
+const contentDiv = document.getElementById('dynamic-content');
+const menuItems = document.querySelectorAll('.list-group-item');
 
 if (mapBox) {
   // Ensure the map container is empty
@@ -74,3 +78,49 @@ if (bookBtn)
 
 const alertMessage = document.querySelector('body').dataset.alert;
 if (alertMessage) showAlert('success', alertMessage, 20);
+
+menuItems.forEach((item) => {
+  item.addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent full page reload
+
+    const section = this.getAttribute('data-section');
+
+    fetch(`/me/${section}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((html) => {
+        // **Extract just the section content from the response**
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('#dynamic-content').innerHTML;
+
+        // **Replace only the right section**
+        contentDiv.innerHTML = newContent;
+        history.pushState({}, '', `/me/${section}`); // Update URL without reloading
+      })
+      .catch((error) => {
+        console.error('❌ AJAX Load Error:', error);
+        contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
+      });
+  });
+});
+
+// Handle back/forward navigation
+window.addEventListener('popstate', function () {
+  const section = window.location.pathname.split('/')[2] || 'settings'; // Extract section from URL
+  fetch(`/me/${section}`)
+    .then((response) => response.text())
+    .then((html) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      contentDiv.innerHTML = doc.querySelector('#dynamic-content').innerHTML;
+    })
+    .catch((error) => {
+      console.error('❌ Browser Navigation Load Error:', error);
+      contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
+    });
+});
