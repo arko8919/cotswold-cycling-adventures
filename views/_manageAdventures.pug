@@ -1,0 +1,23 @@
+.card.shadow-sm 
+  .card-body 
+    h2.mb-4 List of adventures 
+    form.form-user-data
+      select.form-select.form-select-lg.mb-3(aria-label="Select adventures")
+        option.selected None
+        each adventure in adventures
+          option(value=`${adventure.name}`)= adventure.name
+
+.card.shadow-sm.mt-4 
+  .card-body 
+    h2.mb-4 Create adventure 
+    form.form-user-data
+      .mb-3 
+        label.form-label(for='name') Name 
+        input#name.form-control(type='text', value=`value`, required, name='name')
+      .mb-3 
+        label.form-label(for='duration') Duration
+        input#duration.form-control(type='number', value=`value`, required, name='duration')
+      .mb-3 
+        label.form-label(for='distance') Distance 
+        input#distance.form-control(type='number', value=`value`, required, name='distance') 
+

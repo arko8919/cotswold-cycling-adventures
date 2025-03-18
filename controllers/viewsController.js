@@ -49,34 +49,22 @@ exports.getLoginForm = (req, res, next) => {
   });
 };
 
-exports.getAccount = (req, res, next) => {
-  const section = req.params.section || 'settings'; // Default section
-
-  // Define allowed sections
-  const allowedSections = [
-    'settings',
-    'bookings',
-    'reviews',
-    'billing',
-    'manage-adventures',
-    'manage-users',
-    'manage-reviews',
-    'manage-bookings',
-  ];
-
-  // If an invalid section is requested, return a 404 error
-  if (!allowedSections.includes(section)) {
-    return res
-      .status(404)
-      .render('error', { title: 'Error', message: 'Invalid section' });
+exports.getAccount = catchAsync(async (req, res, next) => {
+  const { section } = req.params || 'settings'; // Default section
+  if (section === 'manage-adventures') {
+    const adventures = await Adventure.find();
+    res.status(200).render('account', {
+      title: 'Your Account',
+      section,
+      adventures,
+    });
+  } else {
+    res.status(200).render('account', {
+      title: 'Your Account',
+      section, // Pass the section to Pug
+    });
   }
-
-  // **Always load the full account page (never replace it)**
-  res.status(200).render('account', {
-    title: 'Your Account',
-    section, // Pass the section to Pug
-  });
-};
+});
 
 exports.getMyAdventures = catchAsync(async (req, res, next) => {
   // 1) Find all bookings
