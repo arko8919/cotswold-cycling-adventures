@@ -64,9 +64,12 @@ block content
                         | Spinmaster
         .col-md-6.description
           h2 Overview
-          - const paragraphs = adventure.description.split('\n')
-          each p in paragraphs
-            p.lead= p
+          if adventure.description
+            - const paragraphs = adventure.description.split('\n')
+            each p in paragraphs
+              p.lead= p
+          else
+            p.lead No description provided yet.
 
     //- Adventure Images Section
     section.section-pictures.container.my-5

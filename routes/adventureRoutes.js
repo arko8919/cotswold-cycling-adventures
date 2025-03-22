@@ -56,6 +56,8 @@ router
   .get(adventureController.getAllAdventures)
   .post(
     authController.protect,
+    uploadAdventureImages,
+    resizeAdventureImages,
     authController.restrictTo('admin', 'lead-guide'),
     adventureController.createAdventure,
   );

@@ -78,7 +78,10 @@ const adventureSchema = new mongoose.Schema(
       default: Date.now(),
       select: false, // hide from output
     },
-    startDates: [Date],
+    startDates: {
+      type: [Date],
+      default: Date.now(),
+    },
     secretAdventure: {
       type: Boolean,
       default: false,

@@ -8,6 +8,7 @@ import { updateSettings } from './updateSettings';
 import { bookAdventure } from './stripe';
 import { showAlert } from './alerts';
 import { loadSection } from './loadSection';
+import { createAdventure } from './createAdventure';
 
 // DOM elements
 const mapBox = document.getElementById('map');
@@ -17,6 +18,18 @@ const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookBtn = document.getElementById('book-adventure');
 const menuItems = document.querySelectorAll('.list-group-item');
+const adventureDataForm = document.querySelector('.form-adventure-data');
+const addDateBtn = document.getElementById('addDateBtn');
+const wrapper = document.getElementById('startDatesWrapper');
+
+if (addDateBtn)
+  addDateBtn.addEventListener('click', () => {
+    const newInput = document.createElement('input');
+    newInput.type = 'date';
+    newInput.name = 'startDates[]';
+    newInput.className = 'form-control mt-2';
+    wrapper.appendChild(newInput);
+  });
 
 if (mapBox) {
   // Ensure the map container is empty
@@ -72,6 +85,74 @@ if (bookBtn)
     e.target.textContent = 'Processing...';
     const { adventureId } = e.target.dataset;
     bookAdventure(adventureId);
+  });
+
+if (adventureDataForm)
+  adventureDataForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const form = new FormData();
+
+    form.append('name', document.getElementById('name').value);
+    form.append('distance', document.getElementById('distance').value);
+    form.append('duration', document.getElementById('duration').value);
+    form.append('maxGroupSize', document.getElementById('maxGroupSize').value);
+    form.append('difficulty', document.getElementById('difficulty').value);
+    form.append('price', document.getElementById('price').value);
+    form.append(
+      'priceDiscount',
+      document.getElementById('priceDiscount').value,
+    );
+    form.append('summary', document.getElementById('summary').value);
+    form.append('description', document.getElementById('description').value);
+    form.append('imageCover', document.getElementById('imageCover').files[0]);
+
+    form.append(
+      'startLocation[description]',
+      document.getElementById('startLocationDescription').value,
+    );
+    form.append(
+      'startLocation[address]',
+      document.getElementById('startLocationAddress').value,
+    );
+    form.append('startLocation[type]', 'Point');
+
+    const lng = document.getElementById('startLocationLng').value;
+    const lat = document.getElementById('startLocationLat').value;
+
+    if (lng && lat) {
+      form.append('startLocation[coordinates][]', lng);
+      form.append('startLocation[coordinates][]', lat);
+    }
+
+    // Append all selected start dates
+    const dateInputs = document.querySelectorAll('input[name="startDates[]"');
+    dateInputs.forEach((input) => {
+      if (input.value) {
+        form.append('startDates[]', input.value); // Keeps them grouped as array
+      }
+    });
+
+    const imagesInput = document.getElementById('images');
+    for (let i = 0; i < imagesInput.files.length; i++) {
+      form.append('images', imagesInput.files[i]);
+    }
+
+    form.append(
+      'startLocation',
+      JSON.stringify({
+        type: 'Point',
+        coordinates: [-1.5, 52.4], // Test longitude and latitude
+        address: 'Cotswolds, UK',
+        description: 'Beautiful starting point in the Cotswolds',
+      }),
+    );
+
+    createAdventure(form);
+
+    // form.forEach((value, key) => {
+    //   console.log(`${key}: ${value}`);
+    // });
   });
 
 const alertMessage = document.querySelector('body').dataset.alert;

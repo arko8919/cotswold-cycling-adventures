@@ -1,23 +1,71 @@
 .card.shadow-sm 
   .card-body 
     h2.mb-4 List of adventures 
-    form.form-user-data
+    form.form-adventure-list
       select.form-select.form-select-lg.mb-3(aria-label="Select adventures")
         option.selected None
         each adventure in adventures
-          option(value=`${adventure.name}`)= adventure.name
+          option(value=`${adventure._id}`)= adventure.name
 
 .card.shadow-sm.mt-4 
   .card-body 
     h2.mb-4 Create adventure 
-    form.form-user-data
+    form.form-adventure-data
       .mb-3 
         label.form-label(for='name') Name 
-        input#name.form-control(type='text', value=`value`, required, name='name')
+        input#name.form-control(type='text', required, name='name')
+      .mb-3
+        label.form-label(for='description') Description 
+        input#description.form-control(type='text', name='description')  
+      .mb-3 
+        label.form-label(for='distance') Distance in miles
+        input#distance.form-control(type='number', required, name='distance')  
       .mb-3 
         label.form-label(for='duration') Duration
-        input#duration.form-control(type='number', value=`value`, required, name='duration')
+        input#duration.form-range(type='range', min='1', max='10', value='1', required, name='duration')
       .mb-3 
-        label.form-label(for='distance') Distance 
-        input#distance.form-control(type='number', value=`value`, required, name='distance') 
+        label.form-label(for='maxGroupSize') Max Group Size 
+        input#maxGroupSize.form-range(type='range', min='1', max='25', value='1', required, name='maxGroupSize')  
+      .mb-3 
+        label.form-label(for='difficulty') Difficulty
+        select#difficulty.form-select(aria-label='Select difficulty', required, name='difficulty')
+          option(value = '' selected disabled) Select difficulty 
+          option(value='easy') Easy
+          option(value='medium') Medium
+          option(value='difficult') Hard
+      .mb-3 
+        label.form-label(for='price') Price in £
+        input#price.form-control(type='number', required, name='price')
+      .mb-3 
+        label.form-label(for='priceDiscount') Price discount    
+        input#priceDiscount.form-control(type='number', name='priceDiscount')
+      .mb-3 
+        label.form-label(for='summary') Summary 
+        textarea#summary.form-control(rows='3', required, name='summary' )
+      .mb-3 
+        label.form-label(for='imageCover') Image Cover 
+        input#imageCover.form-control(type='file', name='imageCover')  
+      .mb-3 
+        label.form-label(for='images') Images 
+        input#images.form-control(type='file', name='images', multiple)  
+      .mb-3 
+        label.form-label(for='startDates') Start Dates
+        div#startDatesWrapper
+          input#startDates.form-control(type='date', name='startDates[]')
+        button#addDateBtn.mt-2(type='button') Add another date  
+      .mb-3 
+        label.form-label(for='startLocationDescription') Start Location Description  
+        input#startLocationDescription.form-control(type='text', name='startLocationDescription')
+      .mb-3 
+        label.form-label(for='startLocationAddress') Start Location Address 
+        input#startLocationAddress.form-control(type='text', name='startLocationAddress') 
+      .mb-3 
+        label.form-label Coordinates (longitude, latitude)  
+        .d-flex.gap-2 
+          input#startLocationLng.form-control(type='number', name='startLocationLng', step='any', placeholder='Longitude')
+          input#startLocationLat.form-control(type='number', name='startLocationLat', step='any', placeholder='Latitude')
+
+
+      button.btn Create adventure  
+          
 

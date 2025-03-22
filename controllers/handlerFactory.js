@@ -1,6 +1,7 @@
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
+const { filterObj } = require('../utils/userUtils');
 
 // Delete adventure document
 exports.deleteOne = (Model) =>
@@ -39,6 +40,22 @@ exports.updateOne = (Model) =>
 // Create adventure document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    console.log('Received Data:', req.body); // Debugging log
+
+    // The update object includes only allowed fields (name and email).
+    // Filters the request data to ensure only permitted fields are updated.
+    // const filteredBody = filterObj(
+    //   req.body,
+    //   'name',
+    //   'distance',
+    //   'duration',
+    //   'maxGroupSize',
+    //   'difficulty',
+    //   'price',
+    //   'summary',
+    //   'imageCover',
+    // );
+
     const doc = await Model.create(req.body);
 
     res.status(201).json({
