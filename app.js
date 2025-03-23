@@ -26,13 +26,6 @@ const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
-// app.use((req, res, next) => {
-//   console.log('🟢 Incoming Request:', req.method, req.url);
-//   console.log('🔵 Headers:', req.headers);
-//   console.log('🟠 Raw Body:', req.body);
-//   next();
-// });
-
 // Enable 'trust proxy' to ensure Express correctly detects client IPs and protocols
 // when running behind a reverse proxy (e.g., Nginx, Cloudflare, or a load balancer).
 //app.enable('trust proxy');

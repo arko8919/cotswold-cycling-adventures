@@ -40,21 +40,11 @@ exports.updateOne = (Model) =>
 // Create adventure document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    console.log('Received Data:', req.body); // Debugging log
-
-    // The update object includes only allowed fields (name and email).
-    // Filters the request data to ensure only permitted fields are updated.
-    // const filteredBody = filterObj(
-    //   req.body,
-    //   'name',
-    //   'distance',
-    //   'duration',
-    //   'maxGroupSize',
-    //   'difficulty',
-    //   'price',
-    //   'summary',
-    //   'imageCover',
-    // );
+    if (req.body.locations) {
+      req.body.locations = Array.isArray(req.body.locations)
+        ? req.body.locations.map((loc) => JSON.parse(loc)) // Parse each JSON string into an object
+        : [JSON.parse(req.body.locations)]; // If it's a single value, parse it and wrap it in an array
+    }
 
     const doc = await Model.create(req.body);
 

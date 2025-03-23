@@ -1,4 +1,5 @@
 const Adventure = require('../models/adventureModel');
+const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -53,10 +54,12 @@ exports.getAccount = catchAsync(async (req, res, next) => {
   const { section } = req.params || 'settings'; // Default section
   if (section === 'manage-adventures') {
     const adventures = await Adventure.find();
+    const users = await User.find({ role: { $in: ['lead-guide' || 'admin'] } });
     res.status(200).render('account', {
       title: 'Your Account',
       section,
       adventures,
+      users,
     });
   } else {
     res.status(200).render('account', {

@@ -13166,13 +13166,6 @@ var menuItems = document.querySelectorAll('.list-group-item');
 var adventureDataForm = document.querySelector('.form-adventure-data');
 var addDateBtn = document.getElementById('addDateBtn');
 var wrapper = document.getElementById('startDatesWrapper');
-if (addDateBtn) addDateBtn.addEventListener('click', function () {
-  var newInput = document.createElement('input');
-  newInput.type = 'date';
-  newInput.name = 'startDates[]';
-  newInput.className = 'form-control mt-2';
-  wrapper.appendChild(newInput);
-});
 if (mapBox) {
   // Ensure the map container is empty
   mapBox.innerHTML = '';
@@ -13245,7 +13238,25 @@ if (adventureDataForm) adventureDataForm.addEventListener('submit', function (e)
   form.append('priceDiscount', document.getElementById('priceDiscount').value);
   form.append('summary', document.getElementById('summary').value);
   form.append('description', document.getElementById('description').value);
+
+  // Images Cover
   form.append('imageCover', document.getElementById('imageCover').files[0]);
+
+  // Images
+  var imagesInput = document.getElementById('images');
+  for (var i = 0; i < imagesInput.files.length; i++) {
+    form.append('images', imagesInput.files[i]);
+  }
+
+  // Start Dates
+  var dateInputs = document.querySelectorAll('input[name="startDates[]"');
+  dateInputs.forEach(function (input) {
+    if (input.value) {
+      form.append('startDates[]', input.value); // Keeps them grouped as array
+    }
+  });
+
+  // Start Locations
   form.append('startLocation[description]', document.getElementById('startLocationDescription').value);
   form.append('startLocation[address]', document.getElementById('startLocationAddress').value);
   form.append('startLocation[type]', 'Point');
@@ -13255,18 +13266,6 @@ if (adventureDataForm) adventureDataForm.addEventListener('submit', function (e)
     form.append('startLocation[coordinates][]', lng);
     form.append('startLocation[coordinates][]', lat);
   }
-
-  // Append all selected start dates
-  var dateInputs = document.querySelectorAll('input[name="startDates[]"');
-  dateInputs.forEach(function (input) {
-    if (input.value) {
-      form.append('startDates[]', input.value); // Keeps them grouped as array
-    }
-  });
-  var imagesInput = document.getElementById('images');
-  for (var i = 0; i < imagesInput.files.length; i++) {
-    form.append('images', imagesInput.files[i]);
-  }
   form.append('startLocation', JSON.stringify({
     type: 'Point',
     coordinates: [-1.5, 52.4],
@@ -13274,12 +13273,62 @@ if (adventureDataForm) adventureDataForm.addEventListener('submit', function (e)
     address: 'Cotswolds, UK',
     description: 'Beautiful starting point in the Cotswolds'
   }));
+
+  // Locations
+  var lngs = document.querySelectorAll('input[name="locationLng[]"]');
+  var lats = document.querySelectorAll('input[name="locationLat[]"]');
+  var addresses = document.querySelectorAll('input[name="locationAddress[]"]');
+  var descriptions = document.querySelectorAll('input[name="locationDescription[]"]');
+  var days = document.querySelectorAll('input[name="locationDay[]"]');
+  for (var _i = 0; _i < lngs.length; _i++) {
+    if (lngs[_i].value && lats[_i].value) {
+      var _addresses$_i, _descriptions$_i, _days$_i;
+      var location = {
+        type: 'Point',
+        coordinates: [parseFloat(lngs[_i].value), parseFloat(lats[_i].value)],
+        address: ((_addresses$_i = addresses[_i]) === null || _addresses$_i === void 0 ? void 0 : _addresses$_i.value) || '',
+        description: ((_descriptions$_i = descriptions[_i]) === null || _descriptions$_i === void 0 ? void 0 : _descriptions$_i.value) || '',
+        day: parseInt((_days$_i = days[_i]) === null || _days$_i === void 0 ? void 0 : _days$_i.value) || _i + 1
+      };
+      form.append('locations[]', JSON.stringify(location));
+    }
+  }
+
+  // Guides
+  var guideSelect = document.getElementById('guides');
+  var selectedGuides = Array.from(guideSelect.selectedOptions).map(function (option) {
+    return option.value;
+  });
+  selectedGuides.forEach(function (id) {
+    form.append('guides[]', id);
+  });
   (0, _createAdventure.createAdventure)(form);
 
   // form.forEach((value, key) => {
   //   console.log(`${key}: ${value}`);
   // });
 });
+// Create new date input
+if (addDateBtn) addDateBtn.addEventListener('click', function () {
+  var newInput = document.createElement('input');
+  newInput.type = 'date';
+  newInput.name = 'startDates[]';
+  newInput.className = 'form-control mt-2';
+  wrapper.appendChild(newInput);
+});
+
+// Create new location inputs
+var locationCount = 1;
+document.getElementById('addLocationBtn').addEventListener('click', function () {
+  locationCount++;
+  var wrapper = document.getElementById('startLocationsWrapper');
+  var group = document.createElement('div');
+  group.className = 'location-group mb-3 p-3 border rounded';
+  group.innerHTML = "\n    <label class=\"form-label\">Location ".concat(locationCount, "</label>\n    <div class=\"row g-2\">\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"number\" name=\"locationLng[]\" step=\"any\" placeholder=\"Longitude\" />\n      </div>\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"number\" name=\"locationLat[]\" step=\"any\" placeholder=\"Latitude\" />\n      </div>\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"text\" name=\"locationAddress[]\" placeholder=\"Address\" />\n      </div>\n      <div class=\"col-md-6 mt-2\">\n        <input class=\"form-control\" type=\"text\" name=\"locationDescription[]\" placeholder=\"Description\" />\n      </div>\n      <div class=\"col-md-6 mt-2\">\n        <input class=\"form-control\" type=\"number\" name=\"locationDay[]\" placeholder=\"Day\" />\n      </div>\n    </div>\n  ");
+  wrapper.appendChild(group);
+});
+
+/////////////////////
 var alertMessage = document.querySelector('body').dataset.alert;
 if (alertMessage) (0, _alerts.showAlert)('success', alertMessage, 20);
 if (menuItems) menuItems.forEach(function (item) {
@@ -13321,7 +13370,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53023" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52786" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

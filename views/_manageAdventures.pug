@@ -64,8 +64,29 @@
         .d-flex.gap-2 
           input#startLocationLng.form-control(type='number', name='startLocationLng', step='any', placeholder='Longitude')
           input#startLocationLat.form-control(type='number', name='startLocationLat', step='any', placeholder='Latitude')
-
+      .mb-3
+        label.form-label(for='locations') Locations
+        #startLocationsWrapper
+          .location-group.mb-3.p-3.border.rounded
+            label.form-label Location 1
+            .row.g-2
+              .col-md-4
+                input.form-control(type='number', name='locationLng[]', step='any', placeholder='Longitude')
+              .col-md-4
+                input.form-control(type='number', name='locationLat[]', step='any', placeholder='Latitude')
+              .col-md-4
+                input.form-control(type='text', name='locationAddress[]', placeholder='Address')
+              .col-md-6.mt-2
+                input.form-control(type='text', name='locationDescription[]', placeholder='Description')
+              .col-md-6.mt-2
+                input.form-control(type='number', name='locationDay[]', placeholder='Day')
+        button#addLocationBtn.mt-2(type='button') Add another location
+      .mb-3 
+        label.form-label(for='guides') Select Guides 
+        select#guides.form-select(name='guides', multiple)
+          each user in users 
+            option(value=user._id)= user.name
 
       button.btn Create adventure  
-          
+
 

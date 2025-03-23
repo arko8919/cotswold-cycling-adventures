@@ -22,15 +22,6 @@ const adventureDataForm = document.querySelector('.form-adventure-data');
 const addDateBtn = document.getElementById('addDateBtn');
 const wrapper = document.getElementById('startDatesWrapper');
 
-if (addDateBtn)
-  addDateBtn.addEventListener('click', () => {
-    const newInput = document.createElement('input');
-    newInput.type = 'date';
-    newInput.name = 'startDates[]';
-    newInput.className = 'form-control mt-2';
-    wrapper.appendChild(newInput);
-  });
-
 if (mapBox) {
   // Ensure the map container is empty
   mapBox.innerHTML = '';
@@ -105,8 +96,25 @@ if (adventureDataForm)
     );
     form.append('summary', document.getElementById('summary').value);
     form.append('description', document.getElementById('description').value);
+
+    // Images Cover
     form.append('imageCover', document.getElementById('imageCover').files[0]);
 
+    // Images
+    const imagesInput = document.getElementById('images');
+    for (let i = 0; i < imagesInput.files.length; i++) {
+      form.append('images', imagesInput.files[i]);
+    }
+
+    // Start Dates
+    const dateInputs = document.querySelectorAll('input[name="startDates[]"');
+    dateInputs.forEach((input) => {
+      if (input.value) {
+        form.append('startDates[]', input.value); // Keeps them grouped as array
+      }
+    });
+
+    // Start Locations
     form.append(
       'startLocation[description]',
       document.getElementById('startLocationDescription').value,
@@ -125,19 +133,6 @@ if (adventureDataForm)
       form.append('startLocation[coordinates][]', lat);
     }
 
-    // Append all selected start dates
-    const dateInputs = document.querySelectorAll('input[name="startDates[]"');
-    dateInputs.forEach((input) => {
-      if (input.value) {
-        form.append('startDates[]', input.value); // Keeps them grouped as array
-      }
-    });
-
-    const imagesInput = document.getElementById('images');
-    for (let i = 0; i < imagesInput.files.length; i++) {
-      form.append('images', imagesInput.files[i]);
-    }
-
     form.append(
       'startLocation',
       JSON.stringify({
@@ -148,13 +143,92 @@ if (adventureDataForm)
       }),
     );
 
+    // Locations
+    const lngs = document.querySelectorAll('input[name="locationLng[]"]');
+    const lats = document.querySelectorAll('input[name="locationLat[]"]');
+    const addresses = document.querySelectorAll(
+      'input[name="locationAddress[]"]',
+    );
+    const descriptions = document.querySelectorAll(
+      'input[name="locationDescription[]"]',
+    );
+    const days = document.querySelectorAll('input[name="locationDay[]"]');
+
+    for (let i = 0; i < lngs.length; i++) {
+      if (lngs[i].value && lats[i].value) {
+        const location = {
+          type: 'Point',
+          coordinates: [parseFloat(lngs[i].value), parseFloat(lats[i].value)],
+          address: addresses[i]?.value || '',
+          description: descriptions[i]?.value || '',
+          day: parseInt(days[i]?.value) || i + 1,
+        };
+
+        form.append('locations[]', JSON.stringify(location));
+      }
+    }
+
+    // Guides
+    const guideSelect = document.getElementById('guides');
+    const selectedGuides = Array.from(guideSelect.selectedOptions).map(
+      (option) => option.value,
+    );
+
+    selectedGuides.forEach((id) => {
+      form.append('guides[]', id);
+    });
+
     createAdventure(form);
 
     // form.forEach((value, key) => {
     //   console.log(`${key}: ${value}`);
     // });
   });
+// Create new date input
+if (addDateBtn)
+  addDateBtn.addEventListener('click', () => {
+    const newInput = document.createElement('input');
+    newInput.type = 'date';
+    newInput.name = 'startDates[]';
+    newInput.className = 'form-control mt-2';
+    wrapper.appendChild(newInput);
+  });
 
+// Create new location inputs
+let locationCount = 1;
+
+document.getElementById('addLocationBtn').addEventListener('click', () => {
+  locationCount++;
+
+  const wrapper = document.getElementById('startLocationsWrapper');
+  const group = document.createElement('div');
+  group.className = 'location-group mb-3 p-3 border rounded';
+
+  group.innerHTML = `
+    <label class="form-label">Location ${locationCount}</label>
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input class="form-control" type="number" name="locationLng[]" step="any" placeholder="Longitude" />
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" type="number" name="locationLat[]" step="any" placeholder="Latitude" />
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" type="text" name="locationAddress[]" placeholder="Address" />
+      </div>
+      <div class="col-md-6 mt-2">
+        <input class="form-control" type="text" name="locationDescription[]" placeholder="Description" />
+      </div>
+      <div class="col-md-6 mt-2">
+        <input class="form-control" type="number" name="locationDay[]" placeholder="Day" />
+      </div>
+    </div>
+  `;
+
+  wrapper.appendChild(group);
+});
+
+/////////////////////
 const alertMessage = document.querySelector('body').dataset.alert;
 if (alertMessage) showAlert('success', alertMessage, 20);
 
