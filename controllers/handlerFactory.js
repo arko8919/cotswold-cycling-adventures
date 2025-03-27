@@ -40,10 +40,16 @@ exports.updateOne = (Model) =>
 // Create adventure document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    // Parse locations[] from stringified JSON into real objects
     if (req.body.locations) {
       req.body.locations = Array.isArray(req.body.locations)
-        ? req.body.locations.map((loc) => JSON.parse(loc)) // Parse each JSON string into an object
-        : [JSON.parse(req.body.locations)]; // If it's a single value, parse it and wrap it in an array
+        ? req.body.locations.map((loc) => JSON.parse(loc))
+        : [JSON.parse(req.body.locations)];
+    }
+
+    //  Parse startLocation if it exists and is a string
+    if (req.body.startLocation && typeof req.body.startLocation === 'string') {
+      req.body.startLocation = JSON.parse(req.body.startLocation);
     }
 
     const doc = await Model.create(req.body);

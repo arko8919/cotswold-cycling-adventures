@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const multer = require('multer');
 const sharp = require('sharp');
 const AppError = require('../utils/appError');
@@ -56,8 +57,14 @@ exports.uploadAdventureImages = upload.fields([
 exports.resizeAdventureImages = catchAsync(async (req, res, next) => {
   if (!req.files.imageCover || !req.files.images) return next();
 
+  let { id } = req.params;
+
+  if (req.params.id === undefined) id = new mongoose.Types.ObjectId(); // Generate MongoDB ID manually
+
+  req.body._id = id; // Assign new id
+
   // Cover image filename
-  req.body.imageCover = `adventure-${req.params.id}-${Date.now()}-cover.jpeg`;
+  req.body.imageCover = `adventure-${id}-${Date.now()}-cover.jpeg`;
   // Handle image upload and processing:
   await sharp(req.files.imageCover[0].buffer)
     .resize(2000, 1333)
@@ -71,7 +78,7 @@ exports.resizeAdventureImages = catchAsync(async (req, res, next) => {
   // Process and save multiple uploaded images concurrently:
   await Promise.all(
     req.files.images.map(async (file, i) => {
-      const filename = `adventure-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      const filename = `adventure-${id}-${Date.now()}-${i + 1}.jpeg`;
 
       await sharp(file.buffer)
         .resize(2000, 1333)
