@@ -3,7 +3,7 @@
     h2.mb-4 List of adventures 
     form.form-adventure-list
       select.form-select.form-select-lg.mb-3(aria-label="Select adventures")
-        option.selected None
+        option.selected(value="") None
         each adventure in adventures
           option(value=`${adventure._id}`)= adventure.name
 
@@ -15,7 +15,7 @@
       .row.g-3
         .col-md-6.mb-3
           label.form-label(for='name') Name 
-          input#name.form-control(type='text', required, name='name')
+          input#name.form-control(type='text', required, name='name') 
         .col-md-6.mb-3
           label.form-label(for='description') Description 
           input#description.form-control(type='text', name='description')  
@@ -55,6 +55,10 @@
         .col-md-6.mb-3
           label.form-label(for='images') Images 
           input#images.form-control(type='file', name='images', multiple)  
+      // Select images to delete
+      .col-md-12.mt-3
+        #imageCoverPreviewContainer
+        #imagesPreviewContainer
 
       hr
 

@@ -1,11 +1,13 @@
 import axios from 'axios';
 
 const contentDiv = document.getElementById('dynamic-content');
+const menuItems = document.querySelectorAll('.list-group-item');
 
 /* eslint-disable */
-export const loadSection = async (section, menuItemsRef) => {
+export const loadSection = async (section) => {
   try {
     const url = `/me/${section}`;
+
     const res = await axios.get(url);
 
     // Parse the returned HTML response into a document
@@ -20,7 +22,7 @@ export const loadSection = async (section, menuItemsRef) => {
     history.pushState({}, '', url); // Update URL without reloading
 
     // Toggle active class on the selected menu item
-    menuItemsRef.forEach((item) => {
+    menuItems.forEach((item) => {
       item.classList.toggle(
         'active',
         item.getAttribute('data-section') === section,

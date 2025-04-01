@@ -42,52 +42,64 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
 });
 
 // Middleware to handle multiple file uploads with different field names:
-exports.uploadAdventureImages = upload.fields([
-  {
-    name: 'imageCover',
-    maxCount: 1,
-  },
-  {
-    name: 'images',
-    maxCount: 3,
-  },
-]);
+// exports.uploadAdventureImages = upload.fields([
+//   {
+//     name: 'imageCover',
+//     maxCount: 1,
+//   },
+//   {
+//     name: 'images',
+//     maxCount: 3,
+//   },
+// ]);
+
+// Upload any form fields and files
+exports.uploadAdventureImages = upload.any();
 
 // Middleware to process and resize uploaded adventure images
 exports.resizeAdventureImages = catchAsync(async (req, res, next) => {
-  if (!req.files.imageCover || !req.files.images) return next();
+  //if (!req.files.imageCover || !req.files.images) return next();
 
-  let { id } = req.params;
+  // Generate MongoDB ID manually if there is no ID on req body
+  const id = req.params.id || new mongoose.Types.ObjectId();
+  // Assign new id
+  req.body._id = id;
 
-  if (req.params.id === undefined) id = new mongoose.Types.ObjectId(); // Generate MongoDB ID manually
+  if (!req.files || req.files.length === 0) return next();
 
-  req.body._id = id; // Assign new id
-
-  // Cover image filename
-  req.body.imageCover = `adventure-${id}-${Date.now()}-cover.jpeg`;
-  // Handle image upload and processing:
-  await sharp(req.files.imageCover[0].buffer)
-    .resize(2000, 1333)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/assets/adventures/${req.body.imageCover}`);
-
-  // Images
-  req.body.images = [];
-
-  // Process and save multiple uploaded images concurrently:
-  await Promise.all(
-    req.files.images.map(async (file, i) => {
-      const filename = `adventure-${id}-${Date.now()}-${i + 1}.jpeg`;
-
-      await sharp(file.buffer)
-        .resize(2000, 1333)
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`public/assets/adventures/${filename}`);
-
-      req.body.images.push(filename);
-    }),
+  const imageCoverFile = req.files.find(
+    (file) => file.fieldname === 'imageCover',
   );
+  const imageFiles = req.files.filter((file) => file.fieldname === 'images');
+
+  if (imageCoverFile) {
+    // Cover image filename
+    req.body.imageCover = `adventure-${id}-${Date.now()}-cover.jpeg`;
+    // Handle image upload and processing:
+    await sharp(imageCoverFile.buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/assets/adventures/${req.body.imageCover}`);
+  }
+  // Images
+  if (imageFiles.length > 0) {
+    req.body.images = [];
+
+    // Process and save multiple uploaded images concurrently:
+    await Promise.all(
+      imageFiles.map(async (file, i) => {
+        const filename = `adventure-${id}-${Date.now()}-${i + 1}.jpeg`;
+
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 90 })
+          .toFile(`public/assets/adventures/${filename}`);
+
+        req.body.images.push(filename);
+      }),
+    );
+  }
   next();
 });

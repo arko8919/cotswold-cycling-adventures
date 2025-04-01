@@ -1,7 +1,7 @@
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
-const { filterObj } = require('../utils/userUtils');
+const { deleteFile, deleteMultipleFiles } = require('../utils/fileHandler');
 
 // Delete adventure document
 exports.deleteOne = (Model) =>
@@ -20,6 +20,74 @@ exports.deleteOne = (Model) =>
 // Update adventure document
 exports.updateOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    if (req.body.priceDiscount && req.body.price) {
+      if (Number(req.body.priceDiscount) >= Number(req.body.price)) {
+        return next(
+          new AppError('Discount price should be below regular price', 400),
+        );
+      }
+    }
+
+    // Parse startLocation
+    if (req.body.startLocation && typeof req.body.startLocation === 'string') {
+      req.body.startLocation = JSON.parse(req.body.startLocation);
+    }
+
+    // Parse locations
+    if (req.body.locations) {
+      req.body.locations = Array.isArray(req.body.locations)
+        ? req.body.locations.map((loc) => JSON.parse(loc))
+        : [JSON.parse(req.body.locations)];
+    }
+    console.log(req.params.id);
+
+    // Fetch current document
+    const existingDoc = await Model.findById(req.params.id);
+    if (!existingDoc)
+      return next(new AppError('No document found with that ID', 404));
+
+    //console.log(req.body.deleteImageCover);
+    // console.log(existingDoc.imageCover);
+    // Handle imageCover deletion
+    if (req.body.deleteImageCover === existingDoc.imageCover) {
+      deleteFile(existingDoc.imageCover, 'adventures');
+      req.body.imageCover = undefined;
+    }
+    console.log(req.body['deleteImages[]']);
+    console.log(existingDoc.images);
+
+    // Handle individual image deletion
+    if (req.body['deleteImages[]']) {
+      const toDelete = Array.isArray(req.body['deleteImages[]'])
+        ? req.body['deleteImages[]']
+        : [req.body['deleteImages[]']];
+
+      deleteMultipleFiles(toDelete, 'adventures');
+
+      req.body.images = existingDoc.images.filter(
+        (img) => !toDelete.includes(img),
+      );
+
+      console.log(req.body['deleteImages[]']);
+      console.log(existingDoc.images);
+    } else {
+      req.body.images = existingDoc.images; // preserve if nothing deleted
+    }
+
+    // If new imageCover uploaded, delete old one
+    if (req.body.imageCover && existingDoc.imageCover !== req.body.imageCover) {
+      deleteFile(existingDoc.imageCover);
+    }
+
+    // Add new uploaded images
+    if (
+      req.body.images &&
+      Array.isArray(req.body.images) &&
+      existingDoc.images
+    ) {
+      req.body.images = [...req.body.images];
+    }
+
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true, //  Return the new document after the update has been applied
       runValidators: true, // Ensures that the update operation respects the schema's validation rules.
@@ -40,6 +108,14 @@ exports.updateOne = (Model) =>
 // Create adventure document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    if (req.body.priceDiscount && req.body.price) {
+      if (Number(req.body.priceDiscount) >= Number(req.body.price)) {
+        return next(
+          new AppError('Discount price should be below regular price', 400),
+        );
+      }
+    }
+
     // Parse locations[] from stringified JSON into real objects
     if (req.body.locations) {
       req.body.locations = Array.isArray(req.body.locations)

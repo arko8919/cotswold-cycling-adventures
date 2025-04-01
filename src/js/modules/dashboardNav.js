@@ -1,10 +1,10 @@
 /* eslint-disable */
 // modules/navigation.js
-import { loadSection } from '../loadSection';
-import { handleAdventureForm } from './adventureFormHandlers';
-import { initDynamicLocationFields } from './locationFields';
+import { loadSection } from '../api/loadSection';
+import { handleAdventureForm } from './handleAdventureForm';
+import { populateAdventureForm } from './populateAdventureForm';
 
-export const setupNavigation = () => {
+export const dashboardNav = () => {
   const menuItems = document.querySelectorAll('.list-group-item');
 
   if (menuItems.length) {
@@ -12,11 +12,11 @@ export const setupNavigation = () => {
       item.addEventListener('click', async function (e) {
         e.preventDefault();
         const section = this.getAttribute('data-section');
-        await loadSection(section, menuItems);
+        await loadSection(section);
 
         if (section === 'manage-adventures') {
           handleAdventureForm();
-          initDynamicLocationFields();
+          populateAdventureForm();
         }
       });
     });
@@ -24,11 +24,11 @@ export const setupNavigation = () => {
 
   window.addEventListener('popstate', async () => {
     const section = window.location.pathname.split('/')[2] || 'settings';
-    await loadSection(section, menuItems);
+    await loadSection(section);
 
     if (section === 'manage-adventures') {
       handleAdventureForm();
-      initDynamicLocationFields();
+      populateAdventureForm();
     }
   });
 };

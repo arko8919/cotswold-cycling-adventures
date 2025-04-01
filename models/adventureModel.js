@@ -50,14 +50,6 @@ const adventureSchema = new mongoose.Schema(
     },
     priceDiscount: {
       type: Number,
-      validate: {
-        validator: function (val) {
-          // "this" will not work on update.
-          // "this" only points to current doc on NEW document creation
-          return val < this.price; // check if discount is larger then price
-        },
-        message: 'Discount price ({VALUE}) should be below regular price',
-      },
     },
     summary: {
       type: String,

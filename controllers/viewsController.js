@@ -53,8 +53,11 @@ exports.getLoginForm = (req, res, next) => {
 exports.getAccount = catchAsync(async (req, res, next) => {
   const { section } = req.params || 'settings'; // Default section
   if (section === 'manage-adventures') {
-    const adventures = await Adventure.find();
-    const users = await User.find({ role: { $in: ['lead-guide' || 'admin'] } });
+    const adventures = await Adventure.find().select('name _id');
+    const users = await User.find({
+      role: { $in: ['guide', 'lead-guide', 'admin'] },
+    });
+
     res.status(200).render('account', {
       title: 'Your Account',
       section,

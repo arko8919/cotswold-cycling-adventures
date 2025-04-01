@@ -21,7 +21,11 @@ router.get(
 // Route for the login page
 router.get('/login', authController.isLoggedIn, viewsController.getLoginForm);
 // Route for the user account page (protected, requires login)
-router.get('/me/:section?', authController.protect, viewsController.getAccount);
+router.get(
+  '/me/:section/:id?',
+  authController.protect,
+  viewsController.getAccount,
+);
 
 // Route for viewing a user's booked adventures (protected)
 router.get(
