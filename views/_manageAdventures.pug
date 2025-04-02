@@ -15,7 +15,7 @@
       .row.g-3
         .col-md-6.mb-3
           label.form-label(for='name') Name 
-          input#name.form-control(type='text', required, name='name') 
+          input#name.form-control(type='text', minlength='5', maxlength='40', required, name='name') 
         .col-md-6.mb-3
           label.form-label(for='description') Description 
           input#description.form-control(type='text', name='description')  

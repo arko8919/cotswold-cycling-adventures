@@ -6,6 +6,8 @@ import {
   imagesPreviewContainer,
 } from './formFields';
 
+import { createAdventure } from '../api/createAdventure';
+
 export const populateAdventureForm = () => {
   const select = document.querySelector('.form-select');
   if (select) {
@@ -36,6 +38,7 @@ export const populateAdventureForm = () => {
         const res = await fetch(`/api/v1/adventures/${id}`);
         const data = await res.json();
         const adventure = data.data.data;
+
         console.log(adventure);
 
         // Fill the form with existing adventure data

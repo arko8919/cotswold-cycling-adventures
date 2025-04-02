@@ -52,15 +52,13 @@ export const coverPreviewContainer = (adventure) => {
   );
   coverPreviewContainer.innerHTML = ''; // Clear previous
   if (adventure.imageCover) {
-    const checkbox = `
+    const currentImageCover = `
     <div class="mb-2">
-      <input class="form-check-input" type="checkbox" name="deleteImageCover" id="deleteImageCover" value="${adventure.imageCover}">
-      <label class="form-check-label ms-2" for="deleteImageCover">Delete current cover image</label>
-      <br>
+      <h3>Image Cover</h3>
       <img src="/assets/adventures/${adventure.imageCover}" alt="Cover Image" width="150" class="img-thumbnail mt-2">
     </div>
   `;
-    coverPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
+    coverPreviewContainer.insertAdjacentHTML('beforeend', currentImageCover);
   }
 };
 

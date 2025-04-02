@@ -39,44 +39,33 @@ exports.updateOne = (Model) =>
         ? req.body.locations.map((loc) => JSON.parse(loc))
         : [JSON.parse(req.body.locations)];
     }
-    console.log(req.params.id);
 
     // Fetch current document
     const existingDoc = await Model.findById(req.params.id);
     if (!existingDoc)
       return next(new AppError('No document found with that ID', 404));
 
-    //console.log(req.body.deleteImageCover);
-    // console.log(existingDoc.imageCover);
-    // Handle imageCover deletion
-    if (req.body.deleteImageCover === existingDoc.imageCover) {
-      deleteFile(existingDoc.imageCover, 'adventures');
-      req.body.imageCover = undefined;
+    // Handle images deletion
+    let toDelete = [];
+    if (req.body.deleteImages) {
+      toDelete = Array.isArray(req.body.deleteImages)
+        ? req.body.deleteImages // paths ( images ) to delete are sended as array
+        : [req.body.deleteImages]; // paths ( images )  to delete are sended as string
+      console.log(`File to delete: ${req.body.deleteFile}`);
     }
-    console.log(req.body['deleteImages[]']);
-    console.log(existingDoc.images);
 
-    // Handle individual image deletion
-    if (req.body['deleteImages[]']) {
-      const toDelete = Array.isArray(req.body['deleteImages[]'])
-        ? req.body['deleteImages[]']
-        : [req.body['deleteImages[]']];
-
+    if (toDelete.length > 0) {
+      // Delete files from the server
       deleteMultipleFiles(toDelete, 'adventures');
-
+      // Remove file paths from database
       req.body.images = existingDoc.images.filter(
         (img) => !toDelete.includes(img),
       );
-
-      console.log(req.body['deleteImages[]']);
-      console.log(existingDoc.images);
-    } else {
-      req.body.images = existingDoc.images; // preserve if nothing deleted
     }
 
     // If new imageCover uploaded, delete old one
     if (req.body.imageCover && existingDoc.imageCover !== req.body.imageCover) {
-      deleteFile(existingDoc.imageCover);
+      deleteFile(existingDoc.imageCover, 'adventures');
     }
 
     // Add new uploaded images
@@ -85,7 +74,7 @@ exports.updateOne = (Model) =>
       Array.isArray(req.body.images) &&
       existingDoc.images
     ) {
-      req.body.images = [...req.body.images];
+      req.body.images = [...existingDoc.images, ...req.body.images];
     }
 
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {

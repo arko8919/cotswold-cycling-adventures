@@ -81,8 +81,6 @@ app.post(
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true })); // Enables form submission parsing
 app.use((req, res, next) => {
-  console.log('BODY:', req.body); // for text fields
-  console.log('FILES:', req.files); // for images
   next();
 });
 // Parses cookies from incoming requests,

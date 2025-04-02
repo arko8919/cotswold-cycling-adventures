@@ -1,31 +1,37 @@
 /* eslint-disable */
-// modules/adventureFormHandlers.js
 import { createAdventure } from '../api/createAdventure';
 import { createStartDateInput, createLocationGroup } from './formFields';
 
+// Main function to handle the adventure form
 export const handleAdventureForm = () => {
   const addDateBtn = document.getElementById('addDateBtn');
   const addLocationBtn = document.getElementById('addLocationBtn');
   const form = document.querySelector('.form-adventure-data');
 
+  // Add a new start date input when "Add Date" button is clicked
   if (addDateBtn) {
     addDateBtn.addEventListener('click', () => {
       createStartDateInput();
     });
   }
 
+  // Add a new location group when "Add Location" button is clicked
   if (addLocationBtn) {
     addLocationBtn.addEventListener('click', () => {
       createLocationGroup({});
     });
   }
 
+  // Stop if form is not found
   if (!form) return;
 
+  // Handle form submission
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const formData = new FormData();
 
+    const formData = new FormData(); // Create a new FormData object
+
+    // Collect basic adventure info from the form
     formData.append('name', document.getElementById('name').value);
     formData.append('distance', document.getElementById('distance').value);
     formData.append('duration', document.getElementById('duration').value);
@@ -45,33 +51,34 @@ export const handleAdventureForm = () => {
       document.getElementById('description').value,
     );
 
+    // Handle image uploads
     const imageCover = document.getElementById('imageCover');
     const images = document.getElementById('images');
 
+    // Append main cover image if it exists
     if (imageCover.files[0]) {
       formData.append('imageCover', imageCover.files[0]);
     }
 
+    // Append additional images
     for (let i = 0; i < images.files.length; i++) {
       formData.append('images', images.files[i]);
     }
 
-    const deleteCoverCheckbox = document.getElementById('deleteImageCover');
-    if (deleteCoverCheckbox && deleteCoverCheckbox.checked) {
-      formData.append('deleteImageCover', deleteCoverCheckbox.value);
-    }
-
+    // Append IDs of images marked for deletion
     const deleteImagesCheckboxes = document.querySelectorAll(
       'input[name="deleteImages"]:checked',
     );
     deleteImagesCheckboxes.forEach((checkbox) => {
-      formData.append('deleteImages[]', checkbox.value);
+      formData.append('deleteImages', checkbox.value);
     });
 
+    // Append all start date values
     document.querySelectorAll('input[name="startDates[]"]').forEach((input) => {
       if (input.value) formData.append('startDates[]', input.value);
     });
 
+    // Prepare and append the start location data
     const lng = parseFloat(document.getElementById('startLocationLng').value);
     const lat = parseFloat(document.getElementById('startLocationLat').value);
     const address = document.getElementById('startLocationAddress').value;
@@ -91,6 +98,7 @@ export const handleAdventureForm = () => {
       );
     }
 
+    // Append all additional location data
     document
       .querySelectorAll('input[name="locationLng[]"]')
       .forEach((lngInput, i) => {
@@ -124,19 +132,22 @@ export const handleAdventureForm = () => {
         }
       });
 
+    // Append selected guides
     const guides = document.getElementById('guides');
     Array.from(guides.selectedOptions).forEach((option) => {
       formData.append('guides[]', option.value);
     });
 
+    // Get adventure ID (if updating an existing adventure)
     const select = document.querySelector('.form-select');
     const selectedAdventureId = select?.value;
 
-    // 👇 Log all FormData entries
+    // Log all form data to the console (for debugging)
     for (let pair of formData.entries()) {
       console.log(`Front: ${pair[0]}:`, pair[1]);
     }
 
+    // Decide whether to create a new adventure or update an existing one
     if (!selectedAdventureId) {
       createAdventure(formData, 'create');
     } else {

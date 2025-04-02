@@ -72,11 +72,6 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     uploadAdventureImages,
     resizeAdventureImages,
-    (req, res, next) => {
-      console.log('✅ FINAL BODY:', req.body);
-      console.log('✅ FINAL FILES:', req.files);
-      next();
-    },
     adventureController.updateAdventure,
   )
   .delete(
