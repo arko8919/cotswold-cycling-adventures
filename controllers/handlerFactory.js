@@ -47,20 +47,21 @@ exports.updateOne = (Model) =>
 
     // Handle images deletion
     let toDelete = [];
+    let filtredDoc = [];
+
     if (req.body.deleteImages) {
       toDelete = Array.isArray(req.body.deleteImages)
         ? req.body.deleteImages // paths ( images ) to delete are sended as array
         : [req.body.deleteImages]; // paths ( images )  to delete are sended as string
-      console.log(`File to delete: ${req.body.deleteFile}`);
     }
 
     if (toDelete.length > 0) {
       // Delete files from the server
       deleteMultipleFiles(toDelete, 'adventures');
       // Remove file paths from database
-      req.body.images = existingDoc.images.filter(
-        (img) => !toDelete.includes(img),
-      );
+      filtredDoc = existingDoc.images.filter((img) => !toDelete.includes(img));
+    } else {
+      filtredDoc = existingDoc.images;
     }
 
     // If new imageCover uploaded, delete old one
@@ -69,13 +70,9 @@ exports.updateOne = (Model) =>
     }
 
     // Add new uploaded images
-    if (
-      req.body.images &&
-      Array.isArray(req.body.images) &&
-      existingDoc.images
-    ) {
-      req.body.images = [...existingDoc.images, ...req.body.images];
-    }
+    req.body.images = req.body.images
+      ? [...req.body.images, ...filtredDoc]
+      : [...filtredDoc];
 
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true, //  Return the new document after the update has been applied
