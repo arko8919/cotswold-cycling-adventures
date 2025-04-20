@@ -16,23 +16,6 @@ import { populateAdventureForm } from './modules/populateAdventureForm';
 
 const page = document.body.dataset.page;
 
-// Initializes map in selected adventure page
-const initMap = () => {
-  const mapBox = document.getElementById('map') as HTMLDivElement | null;
-
-  if (mapBox) {
-    mapBox.innerHTML = '';
-
-    // Get location data from data attribute ( json format )
-    const data = mapBox.dataset.locations;
-
-    if (data) {
-      const locations: Location[] = JSON.parse(data);
-      displayMap(locations);
-    }
-  }
-};
-
 // Initializes login form handling from login page
 const initLoginForm = () => {
   const loginForm = document.querySelector(
@@ -60,7 +43,7 @@ const initLogout = () => {
   logOutBtn?.addEventListener('click', logout);
 };
 
-// Initializes user account form handlers
+// Initializes user account "settings" section form handlers
 const initUserForms = () => {
   const userDataForm = document.querySelector(
     '.form-user-data',
@@ -71,7 +54,7 @@ const initUserForms = () => {
 
   if (!userDataForm || !userPasswordForm) return;
 
-  // Updates user data
+  // Handle user data update form submission
   userDataForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -89,7 +72,7 @@ const initUserForms = () => {
     updateSettings(form, 'data');
   });
 
-  // Updates password
+  // Handles password update form submission
   userPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -118,7 +101,7 @@ const initUserForms = () => {
   });
 };
 
-// Initializes booking
+// Initializes booking button functionality on the adventure page
 const initBooking = () => {
   const bookBtn = document.getElementById(
     'book-adventure',
@@ -128,17 +111,36 @@ const initBooking = () => {
     const target = e.target as HTMLButtonElement;
     target.textContent = 'Processing...';
 
-    // Gets the adventure ID for the booking
+    //  Gets the adventure ID for the booking from the visited adventure page
     const { adventureId } = target.dataset;
     bookAdventure(adventureId);
   });
 };
 
+// Initializes map in selected adventure page
+const initMap = () => {
+  const mapBox = document.getElementById('map') as HTMLDivElement | null;
+
+  if (mapBox) {
+    mapBox.innerHTML = '';
+
+    // Get location data from data attribute ( json format )
+    const data = mapBox.dataset.locations;
+
+    if (data) {
+      const locations: Location[] = JSON.parse(data);
+      displayMap(locations);
+    }
+  }
+};
+
+// Displays a success alert using the message stored in the body data attribute (data-alert)
 const showAlertFromBody = () => {
   if (document.body.dataset.alert)
     showAlert('success', document.body.dataset.alert, 20);
 };
 
+// Load only files needed for the page being loaded
 switch (page) {
   case 'login':
     initLoginForm();

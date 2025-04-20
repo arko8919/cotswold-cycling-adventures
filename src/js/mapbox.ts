@@ -1,17 +1,24 @@
 /* eslint-disable */
+import { type Location } from './types';
 
-const displayMap = (locations) => {
-  mapboxgl.accessToken =
+// Access the globally loaded MapboxGL (from CDN <script>) and tell TypeScript
+// to treat it as if it were imported from the 'mapbox-gl' module for full type support
+// "I didn't install module as there was some compatibility issues with other modules"
+const mapbox = (window as any).mapboxgl as typeof import('mapbox-gl');
+
+const displayMap = (locations: Location[]) => {
+  mapbox.accessToken =
     'pk.eyJ1IjoiYXJrbzg5MTkiLCJhIjoiY203ODIyMTdxMDk4MTJxc2hmbGhlODJ6cSJ9.r0Eky05QnJLzmDKPf--oWw';
 
   // Initializes the map with a custom style and disables scroll zoom
-  const map = new mapboxgl.Map({
+  const map = new mapbox.Map({
     container: 'map', // Container ID
     style: 'mapbox://styles/arko8919/cm782fy6601yn01s2ciihcivh', // Style URL
     scrollZoom: false,
   });
 
-  const bounds = new mapboxgl.LngLatBounds(); // Creates a box to hold map coordinates
+  // Creates a box to hold map coordinates
+  const bounds = new mapbox.LngLatBounds();
 
   locations.forEach((loc) => {
     // Create marker
@@ -19,20 +26,20 @@ const displayMap = (locations) => {
     marker.className = 'marker';
 
     // Adds a marker and adjusts the map to include the location
-    new mapboxgl.Marker({
+    new mapbox.Marker({
       element: marker,
       anchor: 'bottom',
     })
-      .setLngLat(loc.coordinates) // location
+      .setLngLat(loc.coordinates) // Location
       .addTo(map); // Displays the marker on the map
     // Expands the map view to include the location
     bounds.extend(loc.coordinates);
 
     // Shows a popup with location details
-    new mapboxgl.Popup({
+    new mapbox.Popup({
       offset: 30, // location details
     })
-      .setLngLat(loc.coordinates) // position
+      .setLngLat(loc.coordinates) // Position
       .setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`)
       .addTo(map); // Displays the popup on the map
   });
