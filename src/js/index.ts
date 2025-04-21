@@ -1,9 +1,7 @@
-/* eslint-disable */
-//import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@babel/polyfill';
 
-import { type Location } from './types';
+import { type GeoLocation } from '@js/types';
 
 import displayMap from './mapbox';
 import { login, logout } from './login';
@@ -18,11 +16,9 @@ const page = document.body.dataset.page;
 
 // Initializes login form handling from login page
 const initLoginForm = () => {
-  const loginForm = document.querySelector(
-    '.form-login',
-  ) as HTMLFormElement | null;
+  const loginForm = document.querySelector('.form-login') as HTMLFormElement;
 
-  loginForm?.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const emailInput = document.getElementById('email') as HTMLInputElement;
@@ -33,7 +29,9 @@ const initLoginForm = () => {
     const email: string = emailInput.value.trim();
     const password: string = passwordInput.value;
 
-    if (email && password) login(email, password);
+    if (!email || !password) return;
+
+    login(email, password);
   });
 };
 
@@ -105,7 +103,9 @@ const initUserForms = () => {
 const initBooking = () => {
   const bookBtn = document.getElementById(
     'book-adventure',
-  ) as HTMLButtonElement;
+  ) as HTMLButtonElement | null;
+
+  if (!bookBtn) return;
 
   bookBtn.addEventListener('click', (e) => {
     const target = e.target as HTMLButtonElement;
@@ -119,7 +119,7 @@ const initBooking = () => {
 
 // Initializes map in selected adventure page
 const initMap = () => {
-  const mapBox = document.getElementById('map') as HTMLDivElement | null;
+  const mapBox = document.getElementById('map') as HTMLDivElement;
 
   if (mapBox) {
     mapBox.innerHTML = '';
@@ -128,7 +128,7 @@ const initMap = () => {
     const data = mapBox.dataset.locations;
 
     if (data) {
-      const locations: Location[] = JSON.parse(data);
+      const locations: GeoLocation[] = JSON.parse(data);
       displayMap(locations);
     }
   }

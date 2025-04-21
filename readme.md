@@ -1,3 +1,3 @@
 # Cotswold Cycling Adventures
 
-Build using modern technologies: node.j, express, mongoDB, mongoose and other
+Build using modern technologies: node.js, express, mongoDB, mongoose and other

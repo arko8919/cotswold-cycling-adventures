@@ -1,12 +1,11 @@
-/* eslint-disable */
-import { type Location } from './types';
+import { type GeoLocation } from '@js/types';
 
 // Access the globally loaded MapboxGL (from CDN <script>) and tell TypeScript
 // to treat it as if it were imported from the 'mapbox-gl' module for full type support
 // "I didn't install module as there was some compatibility issues with other modules"
 const mapbox = (window as any).mapboxgl as typeof import('mapbox-gl');
 
-const displayMap = (locations: Location[]) => {
+const displayMap = (locations: GeoLocation[]): void => {
   mapbox.accessToken =
     'pk.eyJ1IjoiYXJrbzg5MTkiLCJhIjoiY203ODIyMTdxMDk4MTJxc2hmbGhlODJ6cSJ9.r0Eky05QnJLzmDKPf--oWw';
 

@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@js/*": ["src/js/*"]
+    },
     "target": "ES6",
     "module": "ESNext",
     "strict": true,
