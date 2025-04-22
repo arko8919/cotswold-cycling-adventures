@@ -1,46 +1,45 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { showAlert } from './alerts';
+import getErrorMessage from './utils/errorHandler';
 import { CheckoutSessionResponse } from '@js/types';
 
 const stripe = Stripe(process.env.STRIPE_PUBLIC_KEY!);
 
 /**
- * Start Stripe checkout for a given adventure
- * @param adventureId - ID of the adventure being booked
+ * Initiates Stripe Checkout for a given adventure
+ * @param adventureId - The ID of the adventure to be booked
  */
 export const bookAdventure = async (adventureId: string): Promise<void> => {
   try {
+    // Request a Stripe checkout session from the backend
     const response = await axios.get<CheckoutSessionResponse>(
       `/api/v1/bookings/checkout-session/${adventureId}`,
     );
-
+    // Validate session response before proceeding
     if (response.data.status !== 'success' || !response.data.session?.id) {
       throw new Error('Invalid response from booking API.');
     }
 
+    // Redirect the user to Stripe's hosted checkout page
     const result = await stripe.redirectToCheckout({
       sessionId: response.data.session.id,
     });
 
+    // Handle client-side Stripe errors (e.g. popup blocked, network error)
     if (result.error) {
-      const message =
-        result.error.message ?? 'Checkout failed. Please try again.';
-      showAlert({ type: 'error', message });
-    }
-  } catch (error) {
-    let message = 'An unexpected error occurred. Please try again.';
-
-    if (axios.isAxiosError(error)) {
-      const backendMessage = error.response?.data?.message;
-      if (typeof backendMessage === 'string') {
-        message = backendMessage;
+      if (process.env.NODE_ENV === 'development' && result.error) {
+        console.error('Stripe redirectToCheckout error:', result.error);
       }
 
-      console.error('Axios error:', error.response || error.message);
-    } else {
-      console.error('Unknown error:', error);
-    }
+      const message =
+        result.error.message ?? 'Checkout failed. Please try again.';
 
+      showAlert({ type: 'error', message });
+    }
+  } catch (error: unknown) {
+    // Show safe error message and optionally log details in dev
+    const message = getErrorMessage(error, 'Booking failed.');
+    console.error('Booking error:', error);
     showAlert({ type: 'error', message });
   }
 };
