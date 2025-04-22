@@ -15,7 +15,7 @@ export const login = async (email: string, password: string): Promise<void> => {
     });
 
     if (response.data.status === 'success') {
-      showAlert('success', 'Logged in successfully!');
+      showAlert({ type: 'success', message: 'Logged in successfully!' });
       setTimeout(() => {
         window.location.assign('/'); // Redirects to homepage after login
       }, 1000);
@@ -24,11 +24,15 @@ export const login = async (email: string, password: string): Promise<void> => {
     }
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      const message = error.response?.data?.message || 'Login failed.';
-      showAlert('error', message);
+      const messageErr = error.response?.data?.message || 'Login failed.';
+
+      showAlert({ type: 'error', message: messageErr });
     } else {
       console.error('Unexpected error during login:', error);
-      showAlert('error', 'An unexpected error occurred. Please try again.');
+      showAlert({
+        type: 'error',
+        message: 'An unexpected error occurred. Please try again.',
+      });
     }
   }
 };

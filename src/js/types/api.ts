@@ -5,3 +5,10 @@ export interface LoginResponse {
     user: object;
   };
 }
+
+export interface CheckoutSessionResponse {
+  status: 'success';
+  session: {
+    id: string;
+  };
+}

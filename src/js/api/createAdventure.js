@@ -16,10 +16,16 @@ export const createAdventure = async (data, action, id = '') => {
     }
 
     if (res.data.status === 'success') {
-      showAlert('success', `Adventure ${action}d successfully`);
+      showAlert({
+        type: 'success',
+        message: `Adventure ${action}d successfully`,
+      });
     }
   } catch (err) {
     console.log(err.response?.data?.message);
-    showAlert('error', err.response?.data?.message || 'Something went wrong');
+    showAlert({
+      type: 'error',
+      message: err.response?.data?.message || 'Something went wrong',
+    });
   }
 };

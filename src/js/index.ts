@@ -1,7 +1,7 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@babel/polyfill';
 
-import { type GeoLocation } from '@js/types';
+import { type GeoLocation, AlertMessage } from '@js/types';
 
 import displayMap from './mapbox';
 import { login, logout } from './login';
@@ -113,6 +113,8 @@ const initBooking = () => {
 
     //  Gets the adventure ID for the booking from the visited adventure page
     const { adventureId } = target.dataset;
+
+    if (!adventureId) return;
     bookAdventure(adventureId);
   });
 };
@@ -137,7 +139,11 @@ const initMap = () => {
 // Displays a success alert using the message stored in the body data attribute (data-alert)
 const showAlertFromBody = () => {
   if (document.body.dataset.alert)
-    showAlert('success', document.body.dataset.alert, 20);
+    showAlert({
+      type: 'success',
+      message: document.body.dataset.alert,
+      timeout: 20,
+    });
 };
 
 // Load only files needed for the page being loaded
