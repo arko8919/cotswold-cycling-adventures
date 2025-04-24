@@ -24,9 +24,6 @@ export const login = async (email: string, password: string): Promise<void> => {
       throw new Error('Invalid response from login API.');
     }
   } catch (error: unknown) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Login error:', error);
-    }
     const message = getErrorMessage(error, 'Login failed.');
 
     showAlert({ type: 'error', message });
@@ -49,11 +46,7 @@ export const logout = async (): Promise<void> => {
       throw new Error('Invalid response from logout API.');
     }
   } catch (error: unknown) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Logout error:', error);
-    }
     const message = getErrorMessage(error, 'Logout failed.');
-
     showAlert({ type: 'error', message });
   }
 };

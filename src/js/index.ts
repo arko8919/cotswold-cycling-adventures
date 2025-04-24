@@ -158,10 +158,10 @@ switch (page) {
     initMap();
     break;
   case 'account':
-    populateAdventureForm();
-    handleAdventureForm();
     dashboardNav();
-    initUserForms();
+    // initUserForms();
+    // populateAdventureForm();
+    //   handleAdventureForm();
     break;
   default:
 }

@@ -3,7 +3,9 @@ import { showAlert } from './alerts';
 import getErrorMessage from './utils/errorHandler';
 import { CheckoutSessionResponse } from '@js/types';
 
-const stripe = Stripe(process.env.STRIPE_PUBLIC_KEY!);
+const stripe = Stripe(
+  'pk_test_51QuM1LP1ItbjeRQKqk8GOG7jhbz5fhLHQFimTlVb34s0fRa0wIBPcfqNgnk9MDqpi8e6SADvLHWgAtBTndaoMBbs00HoJpKfwx',
+);
 
 /**
  * Initiates Stripe Checkout for a given adventure
@@ -37,9 +39,7 @@ export const bookAdventure = async (adventureId: string): Promise<void> => {
       showAlert({ type: 'error', message });
     }
   } catch (error: unknown) {
-    // Show safe error message and optionally log details in dev
     const message = getErrorMessage(error, 'Booking failed.');
-    console.error('Booking error:', error);
     showAlert({ type: 'error', message });
   }
 };
