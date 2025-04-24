@@ -1,22 +1,25 @@
 /* eslint-disable */
 // modules/navigation.js
 import { loadSection } from '../api/loadSection';
-import { handleAdventureForm } from './handleAdventureForm';
-import { populateAdventureForm } from './populateAdventureForm';
+//import { handleAdventureForm } from './handleAdventureForm';
+//import { populateAdventureForm } from './populateAdventureForm';
 
 export const dashboardNav = () => {
-  const menuItems = document.querySelectorAll('.list-group-item');
+  const menuItems =
+    document.querySelectorAll<HTMLLIElement>('.list-group-item');
 
   if (menuItems.length) {
     menuItems.forEach((item) => {
       item.addEventListener('click', async function (e) {
         e.preventDefault();
-        const section = this.getAttribute('data-section');
+        const section = this.dataset.section;
+        console.log(section);
+        if (!section) return;
         await loadSection(section);
 
         if (section === 'manage-adventures') {
-          handleAdventureForm();
-          populateAdventureForm();
+          // handleAdventureForm();
+          // populateAdventureForm();
         }
       });
     });
@@ -27,8 +30,8 @@ export const dashboardNav = () => {
     await loadSection(section);
 
     if (section === 'manage-adventures') {
-      handleAdventureForm();
-      populateAdventureForm();
+      //handleAdventureForm();
+      //populateAdventureForm();
     }
   });
 };

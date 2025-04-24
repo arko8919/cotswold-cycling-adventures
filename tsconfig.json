@@ -9,9 +9,7 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": false
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }

@@ -1,19 +1,20 @@
 import axios from 'axios';
+import getErrorMessage from '../utils/errorHandler';
 
-const contentDiv = document.getElementById('dynamic-content');
-const menuItems = document.querySelectorAll('.list-group-item');
+const contentDiv = document.getElementById('dynamic-content') as HTMLDivElement;
+const menuItems = document.querySelectorAll<HTMLLIElement>('.list-group-item');
 
-/* eslint-disable */
-export const loadSection = async (section) => {
+export const loadSection = async (section: string) => {
   try {
     const url = `/me/${section}`;
 
+    // Fetch HTML ( string ) of account page
     const res = await axios.get(url);
 
     // Parse the returned HTML response into a document
     const parser = new DOMParser();
     const doc = parser.parseFromString(res.data, 'text/html');
-    const newContent = doc.querySelector('#dynamic-content');
+    const newContent = doc.querySelector('#dynamic-content') as HTMLDivElement;
 
     // Update only the target content area, keeping the rest of the page intact
     contentDiv.innerHTML = newContent.innerHTML;
@@ -23,13 +24,11 @@ export const loadSection = async (section) => {
 
     // Toggle active class on the selected menu item
     menuItems.forEach((item) => {
-      item.classList.toggle(
-        'active',
-        item.getAttribute('data-section') === section,
-      );
+      item.classList.toggle('active', item.dataset.section === section);
     });
-  } catch (error) {
-    console.error('❌ AJAX Load Error:');
+  } catch (err) {
+    getErrorMessage(err, 'Failed to load section:');
+
     // Fallback UI message for users if section fails to load
     contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
   }

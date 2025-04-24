@@ -14,17 +14,17 @@ const stripe = Stripe(
 export const bookAdventure = async (adventureId: string): Promise<void> => {
   try {
     // Request a Stripe checkout session from the backend
-    const response = await axios.get<CheckoutSessionResponse>(
+    const res = await axios.get<CheckoutSessionResponse>(
       `/api/v1/bookings/checkout-session/${adventureId}`,
     );
     // Validate session response before proceeding
-    if (response.data.status !== 'success' || !response.data.session?.id) {
+    if (res.data.status !== 'success' || !res.data.session?.id) {
       throw new Error('Invalid response from booking API.');
     }
 
     // Redirect the user to Stripe's hosted checkout page
     const result = await stripe.redirectToCheckout({
-      sessionId: response.data.session.id,
+      sessionId: res.data.session.id,
     });
 
     // Handle client-side Stripe errors (e.g. popup blocked, network error)
@@ -38,8 +38,8 @@ export const bookAdventure = async (adventureId: string): Promise<void> => {
 
       showAlert({ type: 'error', message });
     }
-  } catch (error: unknown) {
-    const message = getErrorMessage(error, 'Booking failed.');
+  } catch (err: unknown) {
+    const message = getErrorMessage(err, 'Booking failed.');
     showAlert({ type: 'error', message });
   }
 };
