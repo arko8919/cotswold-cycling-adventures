@@ -13032,7 +13032,11 @@ var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P
   });
 };
 var contentDiv = document.getElementById('dynamic-content');
-var menuItems = document.querySelectorAll('.list-group-item');
+/**
+ * Dynamically loads a section into the account page without a full page reload.
+ *
+ * @param section - The section to load (e.g., 'settings', 'bookings').
+ */
 var loadSection = exports.loadSection = function loadSection(section) {
   return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
     var url, res, parser, doc, newContent;
@@ -13040,38 +13044,246 @@ var loadSection = exports.loadSection = function loadSection(section) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
-          url = "/me/".concat(section); // Fetch HTML ( string ) of account page
+          url = "/me/".concat(section); // Fetch the raw HTML string of the requested section
           _context.next = 4;
           return _axios.default.get(url);
         case 4:
           res = _context.sent;
-          // Parse the returned HTML response into a document
+          // Parse the fetched HTML string into a document object
           parser = new DOMParser();
           doc = parser.parseFromString(res.data, 'text/html');
-          newContent = doc.querySelector('#dynamic-content'); // Update only the target content area, keeping the rest of the page intact
+          newContent = doc.querySelector('#dynamic-content'); // Update only the dynamic content area, preserving the rest of the page
           contentDiv.innerHTML = newContent.innerHTML;
-          // Update URL in browser history without reloading the page
-          history.pushState({}, '', url); // Update URL without reloading
-          // Toggle active class on the selected menu item
-          menuItems.forEach(function (item) {
-            item.classList.toggle('active', item.dataset.section === section);
-          });
-          _context.next = 17;
+          // Update the browser URL without triggering a page reload
+          history.pushState({}, '', url);
+          _context.next = 16;
           break;
-        case 13:
-          _context.prev = 13;
+        case 12:
+          _context.prev = 12;
           _context.t0 = _context["catch"](0);
           (0, _errorHandler.default)(_context.t0, 'Failed to load section:');
-          // Fallback UI message for users if section fails to load
+          // Display fallback content if the section fails to load
           contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
-        case 17:
+        case 16:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 13]]);
+    }, _callee, null, [[0, 12]]);
   }));
 };
-},{"axios":"../../node_modules/axios/index.js","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/dashboardNav.ts":[function(require,module,exports) {
+},{"axios":"../../node_modules/axios/index.js","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/formFields.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.imagesPreviewContainer = exports.createStartDateInput = exports.createLocationGroup = exports.coverPreviewContainer = void 0;
+/* eslint-disable */
+
+var createStartDateInput = exports.createStartDateInput = function createStartDateInput(value) {
+  var startDatesWrapper = document.getElementById('startDatesWrapper');
+  if (!startDatesWrapper) return;
+  var newInput = document.createElement('input');
+  newInput.type = 'date';
+  newInput.name = 'startDates[]';
+  newInput.className = 'form-control mt-2';
+  newInput.value = value;
+  startDatesWrapper.appendChild(newInput);
+};
+var createLocationGroup = exports.createLocationGroup = function createLocationGroup(loc) {
+  var _loc$coordinates, _loc$coordinates2;
+  var locationsWrapper = document.getElementById('locationsWrapper');
+  if (!locationsWrapper) return;
+  var locationCount = locationsWrapper.children.length + 1;
+  var group = document.createElement('div');
+  group.className = 'location-group mb-3 p-3 border rounded';
+  group.innerHTML = "\n    <label class=\"form-label\">Location ".concat(locationCount, "</label>\n    <div class=\"row g-2\">\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"number\" name=\"locationLng[]\" step=\"any\" value=\"").concat((loc === null || loc === void 0 || (_loc$coordinates = loc.coordinates) === null || _loc$coordinates === void 0 ? void 0 : _loc$coordinates[0]) || '', "\" placeholder=\"Longitude\" />\n      </div>\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"number\" name=\"locationLat[]\" step=\"any\" value=\"").concat((loc === null || loc === void 0 || (_loc$coordinates2 = loc.coordinates) === null || _loc$coordinates2 === void 0 ? void 0 : _loc$coordinates2[1]) || '', "\" placeholder=\"Latitude\" />\n      </div>\n      <div class=\"col-md-4\">\n        <input class=\"form-control\" type=\"text\" name=\"locationAddress[]\" value=\"").concat((loc === null || loc === void 0 ? void 0 : loc.address) || '', "\" placeholder=\"Address\" />\n      </div>\n      <div class=\"col-md-6 mt-2\">\n        <input class=\"form-control\" type=\"text\" name=\"locationDescription[]\" value=\"").concat((loc === null || loc === void 0 ? void 0 : loc.description) || '', "\" placeholder=\"Description\" />\n      </div>\n      <div class=\"col-md-6 mt-2\">\n        <input class=\"form-control\" type=\"number\" name=\"locationDay[]\" value=\"").concat((loc === null || loc === void 0 ? void 0 : loc.day) || '', "\" placeholder=\"Day\" />\n      </div>\n    </div>\n  ");
+  locationsWrapper.appendChild(group);
+};
+
+// Handle existing image cover
+var coverPreviewContainer = exports.coverPreviewContainer = function coverPreviewContainer(adventure) {
+  var coverPreviewContainer = document.getElementById('imageCoverPreviewContainer');
+  coverPreviewContainer.innerHTML = ''; // Clear previous
+  if (adventure.imageCover) {
+    var currentImageCover = "\n    <div class=\"mb-2\">\n      <h3>Image Cover</h3>\n      <img src=\"/assets/adventures/".concat(adventure.imageCover, "\" alt=\"Cover Image\" width=\"150\" class=\"img-thumbnail mt-2\">\n    </div>\n  ");
+    coverPreviewContainer.insertAdjacentHTML('beforeend', currentImageCover);
+  }
+};
+
+// Handle existing gallery images
+var imagesPreviewContainer = exports.imagesPreviewContainer = function imagesPreviewContainer(adventure) {
+  var imagesPreviewContainer = document.getElementById('imagesPreviewContainer');
+  imagesPreviewContainer.innerHTML = ''; // Clear previous
+  if (Array.isArray(adventure.images)) {
+    adventure.images.forEach(function (img, i) {
+      var checkbox = "\n      <div class=\"mb-2\">\n        <input class=\"form-check-input\" type=\"checkbox\" name=\"deleteImages\" id=\"deleteImage-".concat(i, "\" value=\"").concat(img, "\">\n        <label class=\"form-check-label ms-2\" for=\"deleteImage-").concat(i, "\">Delete image ").concat(i + 1, "</label>\n        <br>\n        <img src=\"/assets/adventures/").concat(img, "\" alt=\"Image ").concat(i + 1, "\" width=\"150\" class=\"img-thumbnail mt-2\">\n      </div>\n    ");
+      imagesPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
+    });
+  }
+};
+},{}],"modules/fillAdventureForm.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fillAdventureForm = void 0;
+var fillAdventureForm = exports.fillAdventureForm = function fillAdventureForm(adventure) {
+  var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+  document.getElementById('name').value = (_a = adventure.name) !== null && _a !== void 0 ? _a : '';
+  document.getElementById('description').value = (_b = adventure.description) !== null && _b !== void 0 ? _b : '';
+  document.getElementById('summary').value = (_c = adventure.summary) !== null && _c !== void 0 ? _c : '';
+  document.getElementById('distance').value = String((_d = adventure.distance) !== null && _d !== void 0 ? _d : '');
+  document.getElementById('duration').value = String((_e = adventure.duration) !== null && _e !== void 0 ? _e : '');
+  document.getElementById('maxGroupSize').value = String((_f = adventure.maxGroupSize) !== null && _f !== void 0 ? _f : '');
+  document.getElementById('price').value = String((_g = adventure.price) !== null && _g !== void 0 ? _g : '');
+  document.getElementById('priceDiscount').value = String((_h = adventure.priceDiscount) !== null && _h !== void 0 ? _h : '');
+  document.getElementById('difficulty').value = (_j = adventure.difficulty) !== null && _j !== void 0 ? _j : '';
+  // Start Location
+  document.getElementById('startLocationDescription').value = (_l = (_k = adventure.startLocation) === null || _k === void 0 ? void 0 : _k.description) !== null && _l !== void 0 ? _l : '';
+  document.getElementById('startLocationAddress').value = (_o = (_m = adventure.startLocation) === null || _m === void 0 ? void 0 : _m.address) !== null && _o !== void 0 ? _o : '';
+  document.getElementById('startLocationLng').value = ((_q = (_p = adventure.startLocation) === null || _p === void 0 ? void 0 : _p.coordinates) === null || _q === void 0 ? void 0 : _q[0]) !== undefined ? String(adventure.startLocation.coordinates[0]) : '';
+  document.getElementById('startLocationLat').value = ((_s = (_r = adventure.startLocation) === null || _r === void 0 ? void 0 : _r.coordinates) === null || _s === void 0 ? void 0 : _s[1]) !== undefined ? String(adventure.startLocation.coordinates[1]) : '';
+};
+},{}],"modules/populateAdventureForm.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.populateAdventureForm = void 0;
+var _formFields = require("./formFields");
+var _fillAdventureForm = require("./fillAdventureForm");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+/* eslint-disable */
+var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var populateAdventureForm = exports.populateAdventureForm = function populateAdventureForm() {
+  var select = document.querySelector('.form-select');
+  if (!select) return;
+  select.addEventListener('change', function (e) {
+    return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var target, id, form, startDatesWrapper, locationsWrapper, res, _yield$res$json, data, adventure, guidesSelect, guideIds;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            target = e.target;
+            id = target.value;
+            form = document.querySelector('.form-adventure-data');
+            if (form) {
+              _context.next = 6;
+              break;
+            }
+            return _context.abrupt("return");
+          case 6:
+            startDatesWrapper = document.getElementById('startDatesWrapper');
+            locationsWrapper = document.getElementById('locationsWrapper'); // If selected "none" option or adventure not exist reset form to initial state
+            if (id) {
+              _context.next = 15;
+              break;
+            }
+            form.reset();
+            startDatesWrapper.innerHTML = '';
+            (0, _formFields.createStartDateInput)();
+            locationsWrapper.innerHTML = '';
+            (0, _formFields.createLocationGroup)({});
+            return _context.abrupt("return");
+          case 15:
+            console.log(id);
+            // ID of adventure exist
+            _context.next = 18;
+            return fetch("/api/v1/adventures/".concat(id));
+          case 18:
+            res = _context.sent;
+            _context.next = 21;
+            return res.json();
+          case 21:
+            _yield$res$json = _context.sent;
+            data = _yield$res$json.data;
+            adventure = data.data;
+            console.log(adventure);
+            // Fill the form with existing adventure data
+            (0, _fillAdventureForm.fillAdventureForm)(adventure);
+            // Fill image cover container
+            (0, _formFields.imagesPreviewContainer)(adventure);
+            // Fill images container
+            (0, _formFields.coverPreviewContainer)(adventure);
+            // Fill start dates
+            if (Array.isArray(adventure.startDates)) {
+              console.log(startDatesWrapper);
+              startDatesWrapper.innerHTML = '';
+              adventure.startDates.forEach(function (dateStr) {
+                var value = new Date(dateStr).toISOString().split('T')[0];
+                (0, _formFields.createStartDateInput)(value);
+              });
+            }
+            // Fill locations
+            if (Array.isArray(adventure.locations)) {
+              locationsWrapper.innerHTML = '';
+              adventure.locations.forEach(function (loc) {
+                (0, _formFields.createLocationGroup)(loc);
+              });
+            }
+            // Set multiple guides
+            guidesSelect = document.getElementById('guides');
+            if (guidesSelect && Array.isArray(adventure.guides)) {
+              // Clear previous selection
+              Array.from(guidesSelect.options).forEach(function (option) {
+                option.selected = false;
+              });
+              // Extract guide IDs
+              guideIds = adventure.guides.map(function (guide) {
+                return guide._id.toString();
+              }); // Select matching options
+              Array.from(guidesSelect.options).forEach(function (option) {
+                if (guideIds.includes(option.value)) {
+                  option.selected = true;
+                }
+              });
+            }
+            _context.next = 37;
+            break;
+          case 34:
+            _context.prev = 34;
+            _context.t0 = _context["catch"](0);
+            console.error('Error fetching adventure data', _context.t0);
+          case 37:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[0, 34]]);
+    }));
+  });
+};
+},{"./formFields":"modules/formFields.js","./fillAdventureForm":"modules/fillAdventureForm.ts"}],"modules/dashboardNav.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13079,6 +13291,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.dashboardNav = void 0;
 var _loadSection = require("../api/loadSection");
+var _populateAdventureForm = require("./populateAdventureForm");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
@@ -13108,46 +13321,63 @@ var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
-/* eslint-disable */
-// modules/navigation.js
 
 //import { handleAdventureForm } from './handleAdventureForm';
-//import { populateAdventureForm } from './populateAdventureForm';
+
+/**
+ * Initializes dashboard navigation.
+ *
+ * - Delegates click events from dashboard menu lists to load content dynamically without page refresh.
+ * - Listens to browser history "popstate" events to handle back/forward navigation.
+ */
 var dashboardNav = exports.dashboardNav = function dashboardNav() {
-  var menuItems = document.querySelectorAll('.list-group-item');
-  if (menuItems.length) {
-    menuItems.forEach(function (item) {
-      item.addEventListener('click', function (e) {
-        return __awaiter(this, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-          var section;
-          return _regeneratorRuntime().wrap(function _callee$(_context) {
-            while (1) switch (_context.prev = _context.next) {
-              case 0:
-                e.preventDefault();
-                section = this.dataset.section;
-                console.log(section);
-                if (section) {
-                  _context.next = 5;
-                  break;
-                }
-                return _context.abrupt("return");
-              case 5:
+  var dashLists = document.querySelectorAll('.dashLists');
+  var activeDashSection = document.querySelector('.dashLists .list-group-item.active');
+  dashLists.forEach(function (list) {
+    list.addEventListener('click', function (e) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var target, section;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              e.preventDefault();
+              // Use closest() to ensure we always get the nearest <li> ancestor with a data-section attribute
+              target = e.target.closest('li[data-section]');
+              if (target instanceof HTMLLIElement) {
+                _context.next = 4;
+                break;
+              }
+              return _context.abrupt("return");
+            case 4:
+              section = target.dataset.section;
+              if (section) {
                 _context.next = 7;
-                return (0, _loadSection.loadSection)(section);
-              case 7:
-                if (section === 'manage-adventures') {
-                  // handleAdventureForm();
-                  // populateAdventureForm();
-                }
-              case 8:
-              case "end":
-                return _context.stop();
-            }
-          }, _callee, this);
-        }));
-      });
+                break;
+              }
+              return _context.abrupt("return");
+            case 7:
+              _context.next = 9;
+              return (0, _loadSection.loadSection)(section);
+            case 9:
+              if (activeDashSection) {
+                activeDashSection.classList.remove('active');
+              }
+              target.classList.add('active');
+              //  Remember active item
+              activeDashSection = target;
+              // Note: If this block grows in the future, consider moving it to a separate handler
+              if (section === 'manage-adventures') {
+                // handleAdventureForm();
+                (0, _populateAdventureForm.populateAdventureForm)();
+              }
+            case 13:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee);
+      }));
     });
-  }
+  });
   window.addEventListener('popstate', function () {
     return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
       var section;
@@ -13158,9 +13388,10 @@ var dashboardNav = exports.dashboardNav = function dashboardNav() {
             _context2.next = 3;
             return (0, _loadSection.loadSection)(section);
           case 3:
+            // Note: If this block grows in the future, consider moving it to a separate handler
             if (section === 'manage-adventures') {
               //handleAdventureForm();
-              //populateAdventureForm();
+              (0, _populateAdventureForm.populateAdventureForm)();
             }
           case 4:
           case "end":
@@ -13170,7 +13401,7 @@ var dashboardNav = exports.dashboardNav = function dashboardNav() {
     }));
   });
 };
-},{"../api/loadSection":"api/loadSection.ts"}],"index.ts":[function(require,module,exports) {
+},{"../api/loadSection":"api/loadSection.ts","./populateAdventureForm":"modules/populateAdventureForm.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es6.array.copy-within.js");
@@ -13495,7 +13726,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56146" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51540" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
