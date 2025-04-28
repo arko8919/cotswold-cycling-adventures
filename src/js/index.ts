@@ -1,18 +1,40 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@babel/polyfill';
 
-import { type GeoLocation, AlertMessage } from '@js/types';
-
+import { GeoLocation } from '@js/types';
 import displayMap from './mapbox';
 import { login, logout } from './login';
-import { updateSettings } from './api/updateSettings';
 import { bookAdventure } from './stripe';
 import { showAlert } from './alerts';
 import { handleAdventureForm } from './modules/handleAdventureForm';
 import { dashboardNav } from './modules/dashboardNav';
 import { populateAdventureForm } from './modules/populateAdventureForm';
+import { initUserForm, initPasswordForm } from './modules/handleSettingsForms';
 
-const page = document.body.dataset.page;
+/**
+ * Entry point for initializing client-side JavaScript functionality.
+ *
+ * Responsibilities:
+ * - Imports and sets up external libraries (Bootstrap, Babel polyfills).
+ * - Initializes page-specific modules based on the page type:
+ *   - Login form handling
+ *   - User account settings forms
+ *   - Adventure booking button
+ *   - Adventure map display with Mapbox
+ *   - Admin dashboard navigation and adventure form handling
+ * - Displays success alerts from server-rendered pages (via body data attributes).
+ * - Always sets up logout functionality across all pages.
+ *
+ * Dynamic Behavior:
+ * - Detects the page context via the `data-page` attribute on the `<body>`.
+ * - Loads only necessary JavaScript modules to optimize performance.
+ *
+ * Dependencies:
+ * - Bootstrap (modal and dropdowns)
+ * - Mapbox (map display)
+ * - Stripe (payment handling)
+ * - Custom modules: login, logout, alerts, map display, form handlers
+ */
 
 // Initializes login form handling from login page
 const initLoginForm = () => {
@@ -42,7 +64,7 @@ const initLogout = () => {
 };
 
 // Initializes user account "settings" section form handlers
-const initUserForms = () => {
+const initSettingsForms = () => {
   const userDataForm = document.querySelector(
     '.form-user-data',
   ) as HTMLFormElement | null;
@@ -55,47 +77,13 @@ const initUserForms = () => {
   // Handle user data update form submission
   userDataForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    const nameInput = document.getElementById('name') as HTMLInputElement;
-    const emailInput = document.getElementById('email') as HTMLInputElement;
-    const photoInput = document.getElementById('photo') as HTMLInputElement;
-
-    const form = new FormData();
-    form.append('name', nameInput.value.trim());
-    form.append('email', emailInput.value.trim());
-
-    const photo = photoInput.files?.[0];
-    if (photo) form.append('photo', photo);
-
-    updateSettings(form, 'data');
+    initUserForm();
   });
 
   // Handles password update form submission
-  userPasswordForm.addEventListener('submit', async (e) => {
+  userPasswordForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    const passwordCurrent = document.getElementById(
-      'password-current',
-    ) as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
-    const passwordConfirm = document.getElementById(
-      'password-confirm',
-    ) as HTMLInputElement;
-
-    if (!passwordCurrent || !password || !passwordConfirm) return;
-
-    await updateSettings(
-      {
-        passwordCurrent: passwordCurrent.value,
-        password: password.value,
-        passwordConfirm: passwordConfirm.value,
-      },
-      'password',
-    );
-
-    passwordCurrent.value = '';
-    password.value = '';
-    passwordConfirm.value = '';
+    initPasswordForm();
   });
 };
 
@@ -146,6 +134,8 @@ const showAlertFromBody = () => {
     });
 };
 
+const page = document.body.dataset.page;
+
 // Load only files needed for the page being loaded
 switch (page) {
   case 'login':
@@ -159,9 +149,9 @@ switch (page) {
     break;
   case 'account':
     dashboardNav();
-    // initUserForms();
-    // populateAdventureForm();
-    //   handleAdventureForm();
+    initSettingsForms();
+    populateAdventureForm();
+    handleAdventureForm();
     break;
   default:
 }

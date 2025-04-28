@@ -1,5 +1,9 @@
 import { Adventure } from '@js/types';
 
+/**
+ * Fills adventure form inputs with provided adventure data.
+ * Safely handles missing fields.
+ */
 export const fillAdventureForm = (adventure: Partial<Adventure>) => {
   (document.getElementById('name') as HTMLInputElement).value =
     adventure.name ?? '';

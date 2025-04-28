@@ -1,4 +1,4 @@
-import { type GeoLocation } from '@js/types';
+import { GeoLocation } from '@js/types';
 
 /**
  * Access the globally loaded MapboxGL instance from the CDN <script> tag and inform TypeScript
