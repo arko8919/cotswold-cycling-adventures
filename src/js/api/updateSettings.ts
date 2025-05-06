@@ -1,6 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { showAlert } from '../alerts';
 import getErrorMessage from '../utils/errorHandler';
+import { UpdatedUser } from '@js/types';
 
 type PasswordData = {
   passwordCurrent: string;
@@ -25,16 +26,21 @@ export const updateSettings = async (
         ? '/api/v1/users/updateMyPassword'
         : '/api/v1/users/updateMe';
 
-    const res: AxiosResponse<any> = await axios.patch(url, data);
+    const res = await axios.patch<UpdatedUser>(url, data);
 
     if (res.data.status === 'success') {
       showAlert({
         type: 'success',
         message: `${type === 'password' ? 'Password' : 'User'} updated successfully!`,
       });
+    } else {
+      throw new Error('Invalid response from update user settings API.');
     }
   } catch (err) {
-    const message = getErrorMessage(err, 'Update failed.');
+    const message = getErrorMessage(
+      err,
+      `${type === 'password' ? 'Password' : 'User'} update failed!`,
+    );
     showAlert({ type: 'error', message });
   }
 };

@@ -3,44 +3,43 @@ import '@babel/polyfill';
 
 import { GeoLocation } from '@js/types';
 import displayMap from './mapbox';
-import { login, logout } from './login';
-import { bookAdventure } from './stripe';
+import logout from './auth/logout';
+import login from './auth/login';
+import bookAdventure from './stripe';
 import { showAlert } from './alerts';
 import { handleAdventureForm } from './modules/handleAdventureForm';
 import { dashboardNav } from './modules/dashboardNav';
 import { populateAdventureForm } from './modules/populateAdventureForm';
-import { initUserForm, initPasswordForm } from './modules/handleSettingsForms';
+import {
+  handleUserForm,
+  handlePasswordForm,
+} from './modules/handleSettingsForm';
 
 /**
- * Entry point for initializing client-side JavaScript functionality.
+ * Initializes client-side functionality for various pages.
  *
  * Responsibilities:
- * - Imports and sets up external libraries (Bootstrap, Babel polyfills).
- * - Initializes page-specific modules based on the page type:
- *   - Login form handling
- *   - User account settings forms
- *   - Adventure booking button
- *   - Adventure map display with Mapbox
- *   - Admin dashboard navigation and adventure form handling
- * - Displays success alerts from server-rendered pages (via body data attributes).
- * - Always sets up logout functionality across all pages.
+ * - Imports and sets up external libraries (e.g., Bootstrap, Babel polyfills).
+ * - Dynamically loads page-specific modules based on the current page context:
+ *   - Login form handling (for `/login`).
+ *   - User settings management (for `/me/settings`).
+ *   - Adventure booking functionality (for `/adventure/:id` or `/adventure/:slug`).
+ *   - Displays adventure locations on a map with Mapbox integration (for `/adventure/:id` or `/adventure/:slug`).
+ *   - Admin dashboard navigation (for `/me/dashboard`).
+ *   - Adventure form handling (for `/me/manage-adventures`).
+ * - Displays success/error alerts from server-rendered pages using data attributes in the `<body>` tag.
+ * - Configures the global logout functionality across all pages.
  *
  * Dynamic Behavior:
- * - Detects the page context via the `data-page` attribute on the `<body>`.
- * - Loads only necessary JavaScript modules to optimize performance.
- *
- * Dependencies:
- * - Bootstrap (modal and dropdowns)
- * - Mapbox (map display)
- * - Stripe (payment handling)
- * - Custom modules: login, logout, alerts, map display, form handlers
+ * - Detects the current page using the `data-page` attribute on the `<body>` element to selectively load modules.
+ * - Utilizes code-splitting and dynamic imports to load only the required JavaScript for the current page to enhance performance.
  */
 
 // Initializes login form handling from login page
 const initLoginForm = () => {
-  const loginForm = document.querySelector('.form-login') as HTMLFormElement;
+  const formLogin = document.querySelector('.form-login') as HTMLFormElement;
 
-  loginForm.addEventListener('submit', (e) => {
+  formLogin.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const emailInput = document.getElementById('email') as HTMLInputElement;
@@ -59,8 +58,8 @@ const initLoginForm = () => {
 
 // Initializes logout handler from any page
 const initLogout = () => {
-  const logOutBtn = document.querySelector('.btn-logout') as HTMLAnchorElement;
-  logOutBtn?.addEventListener('click', logout);
+  const btnLogout = document.querySelector('.btn-logout') as HTMLAnchorElement;
+  btnLogout?.addEventListener('click', logout);
 };
 
 // Initializes user account "settings" section form handlers
@@ -72,18 +71,16 @@ const initSettingsForms = () => {
     '.form-user-password',
   ) as HTMLFormElement | null;
 
-  if (!userDataForm || !userPasswordForm) return;
-
   // Handle user data update form submission
-  userDataForm.addEventListener('submit', (e) => {
+  userDataForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    initUserForm();
+    handleUserForm();
   });
 
   // Handles password update form submission
-  userPasswordForm.addEventListener('submit', (e) => {
+  userPasswordForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    initPasswordForm();
+    handlePasswordForm();
   });
 };
 
@@ -93,9 +90,7 @@ const initBooking = () => {
     'book-adventure',
   ) as HTMLButtonElement | null;
 
-  if (!bookBtn) return;
-
-  bookBtn.addEventListener('click', (e) => {
+  bookBtn?.addEventListener('click', (e) => {
     const target = e.target as HTMLButtonElement;
     target.textContent = 'Processing...';
 
