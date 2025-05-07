@@ -6656,8 +6656,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 /**
- * Access the globally loaded MapboxGL instance from the CDN <script> tag and inform TypeScript
- * to treat it as an imported 'mapbox-gl' module.
+ * Access the MapboxGL instance loaded via CDN (only on specific pages like the adventure page)
+ * and tell TypeScript to treat it as the same type as an imported 'mapbox-gl' module.
+ * This allows proper IntelliSense and type checking when using `mapboxgl` in those files.
  *
  * Note:
  * - The 'mapbox-gl' module was not installed due to compatibility issues with other modules
@@ -6668,7 +6669,7 @@ exports.default = void 0;
  */
 var mapbox = window.mapboxgl;
 /**
- * Displays an interactive Mapbox map with location markers.
+ * Displays an interactive Mapbox map with adventure location markers.
  *
  * @param {GeoLocation[]} locations - An array of location objects containing coordinates and descriptions.
  *
@@ -13037,62 +13038,177 @@ var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P
  * @param id - Adventure ID (required only for updating).
  *
  */
-var createAdventure = exports.createAdventure = function createAdventure(data_1, action_1) {
-  for (var _len = arguments.length, args_1 = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-    args_1[_key - 2] = arguments[_key];
-  }
-  return __awaiter(void 0, [data_1, action_1].concat(args_1), void 0, function (data, action) {
-    var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
-    return /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var url, res, message;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            _context.prev = 0;
-            url = '/api/v1/adventures';
-            _context.t0 = action;
-            _context.next = _context.t0 === 'create' ? 5 : _context.t0 === 'update' ? 9 : 13;
-            break;
-          case 5:
-            _context.next = 7;
-            return _axios.default.post(url, data);
-          case 7:
-            res = _context.sent;
-            return _context.abrupt("break", 14);
-          case 9:
-            _context.next = 11;
-            return _axios.default.patch("".concat(url, "/").concat(id), data);
-          case 11:
-            res = _context.sent;
-            return _context.abrupt("break", 14);
-          case 13:
-            throw new Error("Invalid action: ".concat(action));
-          case 14:
-            if (res.data.status === 'success') {
-              (0, _alerts.showAlert)({
-                type: 'success',
-                message: "Adventure ".concat(action, "d successfully")
-              });
-            }
-            _context.next = 21;
-            break;
-          case 17:
-            _context.prev = 17;
-            _context.t1 = _context["catch"](0);
-            message = (0, _errorHandler.default)(_context.t1, 'Adventure operation failed.');
+var createAdventure = exports.createAdventure = function createAdventure(data, action, id) {
+  return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    var url, res, message;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          url = '/api/v1/adventures';
+          _context.t0 = action;
+          _context.next = _context.t0 === 'create' ? 5 : _context.t0 === 'update' ? 9 : 13;
+          break;
+        case 5:
+          _context.next = 7;
+          return _axios.default.post(url, data);
+        case 7:
+          res = _context.sent;
+          return _context.abrupt("break", 14);
+        case 9:
+          _context.next = 11;
+          return _axios.default.patch("".concat(url, "/").concat(id), data);
+        case 11:
+          res = _context.sent;
+          return _context.abrupt("break", 14);
+        case 13:
+          throw new Error("Invalid action: ".concat(action));
+        case 14:
+          if (res.data.status === 'success') {
             (0, _alerts.showAlert)({
-              type: 'error',
-              message: message
+              type: 'success',
+              message: "Adventure ".concat(action, "d successfully")
             });
-          case 21:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee, null, [[0, 17]]);
-    })();
-  });
+          }
+          _context.next = 21;
+          break;
+        case 17:
+          _context.prev = 17;
+          _context.t1 = _context["catch"](0);
+          message = (0, _errorHandler.default)(_context.t1, action === 'create' ? 'Adventure creation failed' : 'Adventure updating failed');
+          (0, _alerts.showAlert)({
+            type: 'error',
+            message: message
+          });
+        case 21:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 17]]);
+  }));
 };
-},{"axios":"../../node_modules/axios/index.js","../alerts":"alerts.ts","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/formFields.ts":[function(require,module,exports) {
+},{"axios":"../../node_modules/axios/index.js","../alerts":"alerts.ts","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/handleAdventureForm.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _createAdventure = require("../api/createAdventure");
+/**
+ * Initializes and handles the adventure creation/edit form.
+ *
+ * Responsibilities:
+ * - Collects all form field values, including:
+ *   - Basic adventure info (name, distance, duration, etc.)
+ *   - Images (cover image and additional images)
+ *   - Start location and multiple additional locations
+ *   - Selected guides
+ *   - Selected images to delete
+ *   - Adventure start dates
+ * - Compiles all data into a FormData object for server submission.
+ * - Sends either a create or update request based on whether an adventure is selected.
+ * - Logs all form data to the console for debugging.
+ *
+ */
+var handleAdventureForm = function handleAdventureForm(e) {
+  e.preventDefault();
+  var formData = new FormData(); // Create a new FormData object
+  // Collect basic adventure info from the form
+  formData.append('name', document.getElementById('name').value);
+  formData.append('distance', document.getElementById('distance').value);
+  formData.append('duration', document.getElementById('duration').value);
+  formData.append('maxGroupSize', document.getElementById('maxGroupSize').value);
+  formData.append('difficulty', document.getElementById('difficulty').value);
+  formData.append('price', document.getElementById('price').value);
+  formData.append('priceDiscount', document.getElementById('priceDiscount').value);
+  formData.append('summary', document.getElementById('summary').value);
+  formData.append('description', document.getElementById('description').value);
+  // Handle image uploads
+  var imageCover = document.getElementById('imageCover');
+  var images = document.getElementById('images');
+  // Append main cover image if it exists
+  if ((imageCover === null || imageCover === void 0 ? void 0 : imageCover.files) && imageCover.files.length > 0) {
+    formData.append('imageCover', imageCover.files[0]);
+  }
+  // Append additional images
+  var files = images === null || images === void 0 ? void 0 : images.files;
+  if (files === null || files === void 0 ? void 0 : files.length) {
+    Array.from(files).forEach(function (file) {
+      formData.append('images', file);
+    });
+  }
+  // Append IDs of images marked for deletion
+  var deleteImagesCheckboxes = document.querySelectorAll('input[name="deleteImages"]:checked');
+  if (deleteImagesCheckboxes) {
+    deleteImagesCheckboxes.forEach(function (checkbox) {
+      formData.append('deleteImages', checkbox.value);
+    });
+  }
+  // Append all start date values
+  var startDate = document.querySelectorAll('input[name="startDates[]"]');
+  startDate.forEach(function (input) {
+    if (input.value) formData.append('startDates[]', input.value);
+  });
+  // Prepare and append the start location data
+  var lngInput = document.getElementById('startLocationLng');
+  var latInput = document.getElementById('startLocationLat');
+  var addressInput = document.getElementById('startLocationAddress');
+  var descriptionInput = document.getElementById('startLocationDescription');
+  var lng = parseFloat(lngInput.value);
+  var lat = parseFloat(latInput.value);
+  var address = addressInput.value;
+  var description = descriptionInput.value;
+  if (!isNaN(lng) && !isNaN(lat)) {
+    formData.append('startLocation', JSON.stringify({
+      type: 'Point',
+      coordinates: [lng, lat],
+      address: address || '',
+      description: description || ''
+    }));
+  }
+  // Append all additional location data
+  var lngInputs = document.querySelectorAll('input[name="locationLng[]"]');
+  var latInputs = document.querySelectorAll('input[name="locationLat[]"]');
+  var addressInputs = document.querySelectorAll('input[name="locationAddress[]"]');
+  var descriptionInputs = document.querySelectorAll('input[name="locationDescription[]"]');
+  var dayInputs = document.querySelectorAll('input[name="locationDay[]"]');
+  lngInputs.forEach(function (lngInput, i) {
+    var latInput = latInputs[i];
+    var addressInput = addressInputs[i];
+    var descriptionInput = descriptionInputs[i];
+    var dayInput = dayInputs[i];
+    if ((lngInput === null || lngInput === void 0 ? void 0 : lngInput.value) && (latInput === null || latInput === void 0 ? void 0 : latInput.value)) {
+      formData.append('locations[]', JSON.stringify({
+        type: 'Point',
+        coordinates: [parseFloat(lngInput.value), parseFloat(latInput.value)],
+        address: (addressInput === null || addressInput === void 0 ? void 0 : addressInput.value) || '',
+        description: (descriptionInput === null || descriptionInput === void 0 ? void 0 : descriptionInput.value) || '',
+        day: (dayInput === null || dayInput === void 0 ? void 0 : dayInput.value) ? parseInt(dayInput.value, 10) : i + 1
+      }));
+    }
+  });
+  // Append selected guides
+  var guides = document.getElementById('guides');
+  Array.from(guides.selectedOptions).forEach(function (option) {
+    formData.append('guides[]', option.value);
+  });
+  // Get adventure ID (if updating an existing adventure)
+  var select = document.querySelector('.form-select');
+  var selectedAdventureId = select === null || select === void 0 ? void 0 : select.value;
+  // Log all form data to the console (for debugging)
+  // for (let pair of formData.entries()) {
+  //   console.log(`Front: ${pair[0]}:`, pair[1]);
+  // }
+  // Decide whether to create a new adventure or update an existing one
+  if (!selectedAdventureId) {
+    (0, _createAdventure.createAdventure)(formData, 'create');
+  } else {
+    (0, _createAdventure.createAdventure)(formData, 'update', selectedAdventureId);
+  }
+};
+var _default = exports.default = handleAdventureForm;
+},{"../api/createAdventure":"api/createAdventure.ts"}],"modules/formFields.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13156,253 +13272,13 @@ var imagesPreviewContainer = exports.imagesPreviewContainer = function imagesPre
   var imagesPreviewContainer = document.getElementById('imagesPreviewContainer');
   if (!imagesPreviewContainer) return;
   imagesPreviewContainer.innerHTML = ''; // Clear previous
-  if (Array.isArray(adventure.images)) {
-    adventure.images.forEach(function (img, i) {
-      var checkbox = "\n      <div class=\"mb-2\">\n        <input class=\"form-check-input\" type=\"checkbox\" name=\"deleteImages\" id=\"deleteImage-".concat(i, "\" value=\"").concat(img, "\">\n        <label class=\"form-check-label ms-2\" for=\"deleteImage-").concat(i, "\">Delete image ").concat(i + 1, "</label>\n        <br>\n        <img src=\"/assets/adventures/").concat(img, "\" alt=\"Image ").concat(i + 1, "\" width=\"150\" class=\"img-thumbnail mt-2\">\n      </div>\n    ");
-      imagesPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
-    });
-  }
-};
-},{}],"modules/handleAdventureForm.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.handleAdventureForm = void 0;
-var _createAdventure = require("../api/createAdventure");
-var _formFields = require("./formFields");
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-/**
- * Initializes and handles the adventure creation/edit form.
- *
- * Responsibilities:
- * - Adds dynamic start date inputs and location groups when buttons are clicked.
- * - Collects all form field values, including:
- *   - Basic adventure info (name, distance, duration, etc.)
- *   - Images (cover image and additional images)
- *   - Start location and multiple additional locations
- *   - Selected guides
- *   - Selected images to delete
- *   - Adventure start dates
- * - Compiles all data into a FormData object for server submission.
- * - Sends either a create or update request based on whether an adventure is selected.
- * - Logs all form data to the console for debugging.
- *
- * Dependencies:
- * - `createAdventure` API function
- * - `createStartDateInput` and `createLocationGroup` utilities
- *
- * Notes:
- * - Requires specific IDs and name attributes on form inputs to match expected selectors.
- * - Designed to be used in an admin dashboard context for managing adventures.
- */
-var handleAdventureForm = exports.handleAdventureForm = function handleAdventureForm() {
-  var addDateBtn = document.getElementById('addDateBtn');
-  var addLocationBtn = document.getElementById('addLocationBtn');
-  var form = document.querySelector('.form-adventure-data');
-  // Add a new start date input when "Add Date" button is clicked
-  if (addDateBtn) {
-    addDateBtn.addEventListener('click', function () {
-      (0, _formFields.createStartDateInput)();
-    });
-  }
-  // Add a new location group when "Add Location" button is clicked
-  if (addLocationBtn) {
-    addLocationBtn.addEventListener('click', function () {
-      (0, _formFields.createLocationGroup)();
-    });
-  }
-  if (!form) return;
-  // Handle form submission
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var formData = new FormData(); // Create a new FormData object
-    // Collect basic adventure info from the form
-    formData.append('name', document.getElementById('name').value);
-    formData.append('distance', document.getElementById('distance').value);
-    formData.append('duration', document.getElementById('duration').value);
-    formData.append('maxGroupSize', document.getElementById('maxGroupSize').value);
-    formData.append('difficulty', document.getElementById('difficulty').value);
-    formData.append('price', document.getElementById('price').value);
-    formData.append('priceDiscount', document.getElementById('priceDiscount').value);
-    formData.append('summary', document.getElementById('summary').value);
-    formData.append('description', document.getElementById('description').value);
-    // Handle image uploads
-    var imageCover = document.getElementById('imageCover');
-    var images = document.getElementById('images');
-    // Append main cover image if it exists
-    if ((imageCover === null || imageCover === void 0 ? void 0 : imageCover.files) && imageCover.files.length > 0) {
-      formData.append('imageCover', imageCover.files[0]);
-    }
-    // Append additional images
-    var files = images === null || images === void 0 ? void 0 : images.files;
-    if (files === null || files === void 0 ? void 0 : files.length) {
-      Array.from(files).forEach(function (file) {
-        formData.append('images', file);
-      });
-    }
-    // Append IDs of images marked for deletion
-    var deleteImagesCheckboxes = document.querySelectorAll('input[name="deleteImages"]:checked');
-    if (deleteImagesCheckboxes) {
-      deleteImagesCheckboxes.forEach(function (checkbox) {
-        formData.append('deleteImages', checkbox.value);
-      });
-    }
-    // Append all start date values
-    var startDate = document.querySelectorAll('input[name="startDates[]"]');
-    startDate.forEach(function (input) {
-      if (input.value) formData.append('startDates[]', input.value);
-    });
-    // Prepare and append the start location data
-    var lngInput = document.getElementById('startLocationLng');
-    var latInput = document.getElementById('startLocationLat');
-    var addressInput = document.getElementById('startLocationAddress');
-    var descriptionInput = document.getElementById('startLocationDescription');
-    var lng = parseFloat(lngInput.value);
-    var lat = parseFloat(latInput.value);
-    var address = addressInput.value;
-    var description = descriptionInput.value;
-    if (!isNaN(lng) && !isNaN(lat)) {
-      formData.append('startLocation', JSON.stringify({
-        type: 'Point',
-        coordinates: [lng, lat],
-        address: address || '',
-        description: description || ''
-      }));
-    }
-    // Append all additional location data
-    var lngInputs = document.querySelectorAll('input[name="locationLng[]"]');
-    var latInputs = document.querySelectorAll('input[name="locationLat[]"]');
-    var addressInputs = document.querySelectorAll('input[name="locationAddress[]"]');
-    var descriptionInputs = document.querySelectorAll('input[name="locationDescription[]"]');
-    var dayInputs = document.querySelectorAll('input[name="locationDay[]"]');
-    lngInputs.forEach(function (lngInput, i) {
-      var latInput = latInputs[i];
-      var addressInput = addressInputs[i];
-      var descriptionInput = descriptionInputs[i];
-      var dayInput = dayInputs[i];
-      if ((lngInput === null || lngInput === void 0 ? void 0 : lngInput.value) && (latInput === null || latInput === void 0 ? void 0 : latInput.value)) {
-        formData.append('locations[]', JSON.stringify({
-          type: 'Point',
-          coordinates: [parseFloat(lngInput.value), parseFloat(latInput.value)],
-          address: (addressInput === null || addressInput === void 0 ? void 0 : addressInput.value) || '',
-          description: (descriptionInput === null || descriptionInput === void 0 ? void 0 : descriptionInput.value) || '',
-          day: (dayInput === null || dayInput === void 0 ? void 0 : dayInput.value) ? parseInt(dayInput.value, 10) : i + 1
-        }));
-      }
-    });
-    // Append selected guides
-    var guides = document.getElementById('guides');
-    Array.from(guides.selectedOptions).forEach(function (option) {
-      formData.append('guides[]', option.value);
-    });
-    // Get adventure ID (if updating an existing adventure)
-    var select = document.querySelector('.form-select');
-    var selectedAdventureId = select === null || select === void 0 ? void 0 : select.value;
-    // Log all form data to the console (for debugging)
-    var _iterator = _createForOfIteratorHelper(formData.entries()),
-      _step;
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var pair = _step.value;
-        console.log("Front: ".concat(pair[0], ":"), pair[1]);
-      }
-      // Decide whether to create a new adventure or update an existing one
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-    if (!selectedAdventureId) {
-      (0, _createAdventure.createAdventure)(formData, 'create');
-    } else {
-      (0, _createAdventure.createAdventure)(formData, 'update', selectedAdventureId);
-    }
+  if (!(Array.isArray(adventure.images) && adventure.images.length > 0)) return;
+  adventure.images.forEach(function (img, i) {
+    var checkbox = "\n      <div class=\"mb-2\">\n        <input class=\"form-check-input\" type=\"checkbox\" name=\"deleteImages\" id=\"deleteImage-".concat(i, "\" value=\"").concat(img, "\">\n        <label class=\"form-check-label ms-2\" for=\"deleteImage-").concat(i, "\">Delete image ").concat(i + 1, "</label>\n        <br>\n        <img src=\"/assets/adventures/").concat(img, "\" alt=\"Image ").concat(i + 1, "\" width=\"150\" class=\"img-thumbnail mt-2\">\n      </div>\n    ");
+    imagesPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
   });
 };
-},{"../api/createAdventure":"api/createAdventure.ts","./formFields":"modules/formFields.ts"}],"api/loadSection.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.loadSection = void 0;
-var _axios = _interopRequireDefault(require("axios"));
-var _errorHandler = _interopRequireDefault(require("../utils/errorHandler"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
-var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function (resolve) {
-      resolve(value);
-    });
-  }
-  return new (P || (P = Promise))(function (resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
-var contentDiv = document.getElementById('dynamic-content');
-/**
- * Dynamically loads a section into the account page without a full page reload.
- *
- * @param section - The section to load (e.g., 'settings', 'bookings').
- */
-var loadSection = exports.loadSection = function loadSection(section) {
-  return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-    var url, res, parser, doc, newContent;
-    return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) switch (_context.prev = _context.next) {
-        case 0:
-          _context.prev = 0;
-          url = "/me/".concat(section); // Fetch the raw HTML string of the requested section
-          _context.next = 4;
-          return _axios.default.get(url);
-        case 4:
-          res = _context.sent;
-          // Parse the fetched HTML string into a document object
-          parser = new DOMParser();
-          doc = parser.parseFromString(res.data, 'text/html');
-          newContent = doc.querySelector('#dynamic-content'); // Update only the dynamic content area, preserving the rest of the page
-          contentDiv.innerHTML = newContent.innerHTML;
-          // Update the browser URL without triggering a page reload
-          history.pushState({}, '', url);
-          _context.next = 16;
-          break;
-        case 12:
-          _context.prev = 12;
-          _context.t0 = _context["catch"](0);
-          (0, _errorHandler.default)(_context.t0, 'Failed to load section:');
-          // Display fallback content if the section fails to load
-          contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
-        case 16:
-        case "end":
-          return _context.stop();
-      }
-    }, _callee, null, [[0, 12]]);
-  }));
-};
-},{"axios":"../../node_modules/axios/index.js","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/fillAdventureForm.ts":[function(require,module,exports) {
+},{}],"modules/fillAdventureForm.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13436,7 +13312,7 @@ var fillAdventureForm = exports.fillAdventureForm = function fillAdventureForm(a
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.populateAdventureForm = void 0;
+exports.default = void 0;
 var _formFields = require("./formFields");
 var _fillAdventureForm = require("./fillAdventureForm");
 var _errorHandler = _interopRequireDefault(require("../utils/errorHandler"));
@@ -13471,247 +13347,129 @@ var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
+// DOM References
+var btnSubmitAdventure = document.getElementById('submit-adventure');
 /**
  * Handles populating the adventure form when an adventure is selected from a dropdown in Manage adventures section
  *
  * - Listens to changes on the adventure select element.
- * - If no adventure is selected, resets the form to its default empty state.
+ * - If no adventure is selected ("none" option), resets the form to its default empty state.
  * - If an adventure is selected, fetches the corresponding adventure data from the API.
  * - Fills the form fields, including start dates, locations, guides, and image previews, with the fetched data.
  * - Utilizes utility functions for creating and populating form fields and handling errors.
  *
- * Dependencies:
- * - createStartDateInput, createLocationGroup, coverPreviewContainer, imagesPreviewContainer (form field utilities)
- * - fillAdventureForm (form filler utility)
- * - getErrorMessage (error handling utility)
- * - showAlert (UI alert system)
- *
- * Related types:
- * - GeoLocation
- * - Guide
  */
-var populateAdventureForm = exports.populateAdventureForm = function populateAdventureForm() {
-  var select = document.querySelector('.form-select');
-  if (!select) return;
-  select.addEventListener('change', function (e) {
-    return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var target, id, form, locationsWrapper, startDatesWrapper, res, body, adventure, guidesSelect, guideIds, message;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            _context.prev = 0;
-            target = e.target;
-            id = target.value;
-            form = document.querySelector('.form-adventure-data');
-            locationsWrapper = document.getElementById('locationsWrapper');
-            startDatesWrapper = document.getElementById('startDatesWrapper'); // If selected "none" option or adventure not exist reset form to initial state
-            if (id) {
-              _context.next = 15;
-              break;
-            }
-            form.reset();
-            // Calling this functions without params reset date, location, cover and images fields
-            startDatesWrapper.innerHTML = '';
-            (0, _formFields.createStartDateInput)();
-            locationsWrapper.innerHTML = '';
-            (0, _formFields.createLocationGroup)();
-            (0, _formFields.coverPreviewContainer)();
-            (0, _formFields.imagesPreviewContainer)();
-            return _context.abrupt("return");
-          case 15:
+var populateAdventureForm = function populateAdventureForm(e) {
+  return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    var target, id, form, locationsWrapper, startDatesWrapper, res, _yield$res$json, status, adventure, guidesSelect, guideIds, message;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          // If adventure is selected then change button label to Update adventure
+          btnSubmitAdventure.textContent = 'Update Adventure';
+          target = e.target;
+          id = target.value;
+          form = document.querySelector('.form-adventure-data');
+          locationsWrapper = document.getElementById('locationsWrapper');
+          startDatesWrapper = document.getElementById('startDatesWrapper'); // If selected "none" option or adventure not exist reset form to initial state
+          if (id) {
             _context.next = 17;
-            return fetch("/api/v1/adventures/".concat(id));
-          case 17:
-            res = _context.sent;
-            if (res.ok) {
-              _context.next = 20;
-              break;
-            }
-            throw new Error('Failed to fetch adventure.');
-          case 20:
-            _context.next = 22;
-            return res.json();
-          case 22:
-            body = _context.sent;
-            if (!(body.status !== 'success')) {
-              _context.next = 25;
-              break;
-            }
-            throw new Error('API error: status not success.');
-          case 25:
-            adventure = body.data.data; // Fill the form with existing adventure data
-            (0, _fillAdventureForm.fillAdventureForm)(adventure);
-            // Fill image cover container
-            (0, _formFields.imagesPreviewContainer)(adventure);
-            // Fill images container
-            (0, _formFields.coverPreviewContainer)(adventure);
-            // Fill start dates
-            if (Array.isArray(adventure.startDates)) {
-              startDatesWrapper.innerHTML = '';
-              adventure.startDates.forEach(function (dateStr) {
-                var value = new Date(dateStr).toISOString().split('T')[0];
-                (0, _formFields.createStartDateInput)(value);
-              });
-            }
-            // Fill locations
-            if (Array.isArray(adventure.locations)) {
-              locationsWrapper.innerHTML = '';
-              adventure.locations.forEach(function (loc) {
-                (0, _formFields.createLocationGroup)(loc);
-              });
-            }
-            // Set multiple adventure guides
-            guidesSelect = document.getElementById('guides');
-            if (Array.isArray(adventure.guides)) {
-              // Convert to normal array and clear previous selection
-              Array.from(guidesSelect.options).forEach(function (option) {
-                option.selected = false;
-              });
-              // Extract guide IDs
-              guideIds = adventure.guides.map(function (guide) {
-                return guide._id;
-              }); // Select matching options
-              Array.from(guidesSelect.options).forEach(function (option) {
-                if (guideIds.includes(option.value)) {
-                  option.selected = true;
-                }
-              });
-            }
-            _context.next = 39;
             break;
-          case 35:
-            _context.prev = 35;
-            _context.t0 = _context["catch"](0);
-            message = (0, _errorHandler.default)(_context.t0, 'Error fetching adventure data');
-            (0, _alerts.showAlert)({
-              type: 'error',
-              message: message
-            });
-          case 39:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee, null, [[0, 35]]);
-    }));
-  });
-};
-},{"./formFields":"modules/formFields.ts","./fillAdventureForm":"modules/fillAdventureForm.ts","../utils/errorHandler":"utils/errorHandler.ts","../alerts":"alerts.ts"}],"modules/dashboardNav.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.dashboardNav = void 0;
-var _loadSection = require("../api/loadSection");
-var _handleAdventureForm = require("./handleAdventureForm");
-var _populateAdventureForm = require("./populateAdventureForm");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
-var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function (resolve) {
-      resolve(value);
-    });
-  }
-  return new (P || (P = Promise))(function (resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
-/**
- * Initializes dashboard navigation.
- *
- * - Delegates click events from dashboard menu lists to load content dynamically without page refresh.
- * - Listens to browser history "popstate" events to handle back/forward navigation.
- */
-var dashboardNav = exports.dashboardNav = function dashboardNav() {
-  var dashLists = document.querySelectorAll('.dashLists');
-  var activeDashSection = document.querySelector('.dashLists .list-group-item.active');
-  dashLists.forEach(function (list) {
-    list.addEventListener('click', function (e) {
-      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-        var target, section;
-        return _regeneratorRuntime().wrap(function _callee$(_context) {
-          while (1) switch (_context.prev = _context.next) {
-            case 0:
-              e.preventDefault();
-              // Use closest() to ensure we always get the nearest <li> ancestor with a data-section attribute
-              target = e.target.closest('li[data-section]');
-              if (target instanceof HTMLLIElement) {
-                _context.next = 4;
-                break;
-              }
-              return _context.abrupt("return");
-            case 4:
-              section = target.dataset.section;
-              if (section) {
-                _context.next = 7;
-                break;
-              }
-              return _context.abrupt("return");
-            case 7:
-              _context.next = 9;
-              return (0, _loadSection.loadSection)(section);
-            case 9:
-              if (activeDashSection) {
-                activeDashSection.classList.remove('active');
-              }
-              target.classList.add('active');
-              //  Remember active item
-              activeDashSection = target;
-              // Note: If this block grows in the future, consider moving it to a separate handler
-              if (section === 'manage-adventures') {
-                (0, _handleAdventureForm.handleAdventureForm)();
-                (0, _populateAdventureForm.populateAdventureForm)();
-              }
-            case 13:
-            case "end":
-              return _context.stop();
           }
-        }, _callee);
-      }));
-    });
-  });
-  window.addEventListener('popstate', function () {
-    return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-      var section;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            section = window.location.pathname.split('/')[2] || 'settings';
-            _context2.next = 3;
-            return (0, _loadSection.loadSection)(section);
-          case 3:
-            // Note: If this block grows in the future, consider moving it to a separate handler
-            if (section === 'manage-adventures') {
-              (0, _handleAdventureForm.handleAdventureForm)();
-              (0, _populateAdventureForm.populateAdventureForm)();
-            }
-          case 4:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-  });
+          form.reset();
+          // Clear existing start date fields and insert a new empty one
+          startDatesWrapper.innerHTML = '';
+          (0, _formFields.createStartDateInput)();
+          // Clear existing location fields and insert a new empty group
+          locationsWrapper.innerHTML = '';
+          (0, _formFields.createLocationGroup)();
+          // Clear existing cover and image preview fields
+          (0, _formFields.coverPreviewContainer)();
+          (0, _formFields.imagesPreviewContainer)();
+          // If 'none' is selected then change button label to create adventure
+          btnSubmitAdventure.textContent = 'Create Adventure';
+          return _context.abrupt("return");
+        case 17:
+          _context.next = 19;
+          return fetch("/api/v1/adventures/".concat(id));
+        case 19:
+          res = _context.sent;
+          if (res.ok) {
+            _context.next = 22;
+            break;
+          }
+          throw new Error('Failed to fetch adventure.');
+        case 22:
+          _context.next = 24;
+          return res.json();
+        case 24:
+          _yield$res$json = _context.sent;
+          status = _yield$res$json.status;
+          adventure = _yield$res$json.data.data;
+          if (!(status !== 'success')) {
+            _context.next = 29;
+            break;
+          }
+          throw new Error('API error: status not success.');
+        case 29:
+          // Fill the form with existing adventure data
+          (0, _fillAdventureForm.fillAdventureForm)(adventure);
+          // Fill image cover container
+          (0, _formFields.imagesPreviewContainer)(adventure);
+          // Fill images container
+          (0, _formFields.coverPreviewContainer)(adventure);
+          // Fill start dates
+          if (Array.isArray(adventure.startDates)) {
+            startDatesWrapper.innerHTML = '';
+            adventure.startDates.forEach(function (dateStr) {
+              var value = new Date(dateStr).toISOString().split('T')[0];
+              (0, _formFields.createStartDateInput)(value);
+            });
+          }
+          // Fill locations
+          if (Array.isArray(adventure.locations)) {
+            locationsWrapper.innerHTML = '';
+            adventure.locations.forEach(function (loc) {
+              (0, _formFields.createLocationGroup)(loc);
+            });
+          }
+          // Set multiple adventure guides
+          guidesSelect = document.getElementById('guides');
+          if (Array.isArray(adventure.guides)) {
+            // Convert to normal array and clear previous selection
+            Array.from(guidesSelect.options).forEach(function (option) {
+              option.selected = false;
+            });
+            // Extract guide IDs
+            guideIds = adventure.guides.map(function (guide) {
+              return guide._id;
+            }); // Select matching options
+            Array.from(guidesSelect.options).forEach(function (option) {
+              if (guideIds.includes(option.value)) {
+                option.selected = true;
+              }
+            });
+          }
+          _context.next = 42;
+          break;
+        case 38:
+          _context.prev = 38;
+          _context.t0 = _context["catch"](0);
+          message = (0, _errorHandler.default)(_context.t0, 'Error fetching adventure data');
+          (0, _alerts.showAlert)({
+            type: 'error',
+            message: message
+          });
+        case 42:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 38]]);
+  }));
 };
-},{"../api/loadSection":"api/loadSection.ts","./handleAdventureForm":"modules/handleAdventureForm.ts","./populateAdventureForm":"modules/populateAdventureForm.ts"}],"api/updateSettings.ts":[function(require,module,exports) {
+var _default = exports.default = populateAdventureForm;
+},{"./formFields":"modules/formFields.ts","./fillAdventureForm":"modules/fillAdventureForm.ts","../utils/errorHandler":"utils/errorHandler.ts","../alerts":"alerts.ts"}],"api/updateSettings.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13883,7 +13641,249 @@ var handlePasswordForm = exports.handlePasswordForm = function handlePasswordFor
     }, _callee);
   }));
 };
-},{"../api/updateSettings":"api/updateSettings.ts"}],"index.ts":[function(require,module,exports) {
+},{"../api/updateSettings":"api/updateSettings.ts"}],"modules/initAccountSections.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initSettingsForms = exports.initManageAdventuresForms = void 0;
+var _handleAdventureForm = _interopRequireDefault(require("./handleAdventureForm"));
+var _populateAdventureForm = _interopRequireDefault(require("./populateAdventureForm"));
+var _formFields = require("./formFields");
+var _handleSettingsForm = require("./handleSettingsForm");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+// Initializes user account "settings" section form handlers
+var initSettingsForms = exports.initSettingsForms = function initSettingsForms() {
+  var userDataForm = document.querySelector('.form-user-data');
+  var userPasswordForm = document.querySelector('.form-user-password');
+  // Handle user data update form submission
+  userDataForm === null || userDataForm === void 0 ? void 0 : userDataForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    (0, _handleSettingsForm.handleUserForm)();
+  });
+  // Handles password update form submission
+  userPasswordForm === null || userPasswordForm === void 0 ? void 0 : userPasswordForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    (0, _handleSettingsForm.handlePasswordForm)();
+  });
+};
+var initManageAdventuresForms = exports.initManageAdventuresForms = function initManageAdventuresForms() {
+  var select = document.querySelector('.form-select');
+  if (!select) return;
+  select.addEventListener('change', _populateAdventureForm.default);
+  // Add a new start date input when "Add Date" button is clicked
+  var addDateBtn = document.getElementById('addDateBtn');
+  if (addDateBtn) {
+    addDateBtn.addEventListener('click', function () {
+      (0, _formFields.createStartDateInput)();
+    });
+  }
+  // Add a new location group when "Add Location" button is clicked
+  var addLocationBtn = document.getElementById('addLocationBtn');
+  if (addLocationBtn) {
+    addLocationBtn.addEventListener('click', function () {
+      (0, _formFields.createLocationGroup)();
+    });
+  }
+  var form = document.querySelector('.form-adventure-data');
+  if (!form) return;
+  // Handle form submission
+  form.addEventListener('submit', _handleAdventureForm.default);
+};
+},{"./handleAdventureForm":"modules/handleAdventureForm.ts","./populateAdventureForm":"modules/populateAdventureForm.ts","./formFields":"modules/formFields.ts","./handleSettingsForm":"modules/handleSettingsForm.ts"}],"api/loadSection.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.loadSection = void 0;
+var _axios = _interopRequireDefault(require("axios"));
+var _errorHandler = _interopRequireDefault(require("../utils/errorHandler"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var contentDiv = document.getElementById('dynamic-content');
+/**
+ * Dynamically loads a section into the account page without a full page reload.
+ *
+ * @param section - The section to load (e.g., 'settings', 'bookings').
+ */
+var loadSection = exports.loadSection = function loadSection(section) {
+  return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    var url, res, parser, doc, newContent;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          url = "/me/".concat(section); // Fetch the raw HTML string of the requested section
+          _context.next = 4;
+          return _axios.default.get(url);
+        case 4:
+          res = _context.sent;
+          // Parse the fetched HTML string into a document object
+          parser = new DOMParser();
+          doc = parser.parseFromString(res.data, 'text/html');
+          newContent = doc.querySelector('#dynamic-content'); // Update only the dynamic content area, preserving the rest of the page
+          contentDiv.innerHTML = newContent.innerHTML;
+          // Update the browser URL without triggering a page reload
+          history.pushState({}, '', url);
+          _context.next = 16;
+          break;
+        case 12:
+          _context.prev = 12;
+          _context.t0 = _context["catch"](0);
+          (0, _errorHandler.default)(_context.t0, 'Failed to load section:');
+          // Display fallback content if the section fails to load
+          contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';
+        case 16:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 12]]);
+  }));
+};
+},{"axios":"../../node_modules/axios/index.js","../utils/errorHandler":"utils/errorHandler.ts"}],"modules/dashboardNav.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.dashboardNav = void 0;
+var _loadSection = require("../api/loadSection");
+var _initAccountSections = require("./initAccountSections");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator.return && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, catch: function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+/**
+ * Initializes dashboard navigation.
+ *
+ * - Delegates click events from dashboard menu lists to load content dynamically without page refresh.
+ * - Listens to browser history "popstate" events to handle back/forward navigation.
+ */
+var dashboardNav = exports.dashboardNav = function dashboardNav() {
+  var dashLists = document.querySelectorAll('.dashLists');
+  var activeDashSection = document.querySelector('.dashLists .list-group-item.active');
+  dashLists.forEach(function (list) {
+    list.addEventListener('click', function (e) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var target, section;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              e.preventDefault();
+              // Use closest() to ensure we always get the nearest <li> ancestor with a data-section attribute
+              target = e.target.closest('li[data-section]');
+              if (target instanceof HTMLLIElement) {
+                _context.next = 4;
+                break;
+              }
+              return _context.abrupt("return");
+            case 4:
+              section = target.dataset.section;
+              if (section) {
+                _context.next = 7;
+                break;
+              }
+              return _context.abrupt("return");
+            case 7:
+              _context.next = 9;
+              return (0, _loadSection.loadSection)(section);
+            case 9:
+              if (activeDashSection) {
+                activeDashSection.classList.remove('active');
+              }
+              target.classList.add('active');
+              //  Remember active item
+              activeDashSection = target;
+              // Note: If this block grows in the future, consider moving it to a separate handler
+              if (section === 'manage-adventures') {
+                (0, _initAccountSections.initManageAdventuresForms)();
+              }
+            case 13:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee);
+      }));
+    });
+  });
+  window.addEventListener('popstate', function () {
+    return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      var section;
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            section = window.location.pathname.split('/')[2] || 'settings';
+            _context2.next = 3;
+            return (0, _loadSection.loadSection)(section);
+          case 3:
+            // Note: If this block grows in the future, consider moving it to a separate handler
+            if (section === 'manage-adventures') {
+              (0, _initAccountSections.initManageAdventuresForms)();
+            }
+          case 4:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2);
+    }));
+  });
+};
+},{"../api/loadSection":"api/loadSection.ts","./initAccountSections":"modules/initAccountSections.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es6.array.copy-within.js");
@@ -14022,10 +14022,8 @@ var _logout = _interopRequireDefault(require("./auth/logout"));
 var _login = _interopRequireDefault(require("./auth/login"));
 var _stripe = _interopRequireDefault(require("./stripe"));
 var _alerts = require("./alerts");
-var _handleAdventureForm = require("./modules/handleAdventureForm");
+var _initAccountSections = require("./modules/initAccountSections");
 var _dashboardNav = require("./modules/dashboardNav");
-var _populateAdventureForm = require("./modules/populateAdventureForm");
-var _handleSettingsForm = require("./modules/handleSettingsForm");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 /**
  * Initializes client-side functionality for various pages.
@@ -14064,21 +14062,6 @@ var initLogout = function initLogout() {
   var btnLogout = document.querySelector('.btn-logout');
   btnLogout === null || btnLogout === void 0 ? void 0 : btnLogout.addEventListener('click', _logout.default);
 };
-// Initializes user account "settings" section form handlers
-var initSettingsForms = function initSettingsForms() {
-  var userDataForm = document.querySelector('.form-user-data');
-  var userPasswordForm = document.querySelector('.form-user-password');
-  // Handle user data update form submission
-  userDataForm === null || userDataForm === void 0 ? void 0 : userDataForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    (0, _handleSettingsForm.handleUserForm)();
-  });
-  // Handles password update form submission
-  userPasswordForm === null || userPasswordForm === void 0 ? void 0 : userPasswordForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    (0, _handleSettingsForm.handlePasswordForm)();
-  });
-};
 // Initializes booking button functionality on the adventure page
 var initBooking = function initBooking() {
   var bookBtn = document.getElementById('book-adventure');
@@ -14091,27 +14074,27 @@ var initBooking = function initBooking() {
     (0, _stripe.default)(adventureId);
   });
 };
-// Initializes map in selected adventure page
+// Initializes map on the adventure page
 var initMap = function initMap() {
   var mapBox = document.getElementById('map');
-  if (mapBox) {
-    mapBox.innerHTML = '';
-    // Get location data from data attribute ( json format )
-    var data = mapBox.dataset.locations;
-    if (data) {
-      var locations = JSON.parse(data);
-      (0, _mapbox.default)(locations);
-    }
-  }
+  if (!mapBox) return;
+  mapBox.innerHTML = '';
+  // Get location data from data attribute ( json format )
+  var data = mapBox.dataset.locations;
+  if (!data) return;
+  var locations = JSON.parse(data);
+  (0, _mapbox.default)(locations);
 };
 // Displays a success alert using the message stored in the body data attribute (data-alert)
 var showAlertFromBody = function showAlertFromBody() {
-  if (document.body.dataset.alert) (0, _alerts.showAlert)({
+  if (!document.body.dataset.alert) return;
+  (0, _alerts.showAlert)({
     type: 'success',
     message: document.body.dataset.alert,
     timeout: 20
   });
 };
+// Get the current displayed page name
 var page = document.body.dataset.page;
 // Load only files needed for the page being loaded
 switch (page) {
@@ -14126,9 +14109,8 @@ switch (page) {
     break;
   case 'account':
     (0, _dashboardNav.dashboardNav)();
-    initSettingsForms();
-    (0, _populateAdventureForm.populateAdventureForm)();
-    (0, _handleAdventureForm.handleAdventureForm)();
+    (0, _initAccountSections.initSettingsForms)();
+    (0, _initAccountSections.initManageAdventuresForms)();
     break;
   default:
 }
@@ -14136,7 +14118,7 @@ switch (page) {
   initLogout();
   showAlertFromBody();
 })();
-},{"core-js/modules/es6.array.copy-within.js":"../../node_modules/core-js/modules/es6.array.copy-within.js","core-js/modules/es6.array.fill.js":"../../node_modules/core-js/modules/es6.array.fill.js","core-js/modules/es6.array.filter.js":"../../node_modules/core-js/modules/es6.array.filter.js","core-js/modules/es6.array.find.js":"../../node_modules/core-js/modules/es6.array.find.js","core-js/modules/es6.array.find-index.js":"../../node_modules/core-js/modules/es6.array.find-index.js","core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.from.js":"../../node_modules/core-js/modules/es6.array.from.js","core-js/modules/es7.array.includes.js":"../../node_modules/core-js/modules/es7.array.includes.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.map.js":"../../node_modules/core-js/modules/es6.array.map.js","core-js/modules/es6.array.of.js":"../../node_modules/core-js/modules/es6.array.of.js","core-js/modules/es6.array.slice.js":"../../node_modules/core-js/modules/es6.array.slice.js","core-js/modules/es6.array.species.js":"../../node_modules/core-js/modules/es6.array.species.js","core-js/modules/es6.date.to-primitive.js":"../../node_modules/core-js/modules/es6.date.to-primitive.js","core-js/modules/es6.function.has-instance.js":"../../node_modules/core-js/modules/es6.function.has-instance.js","core-js/modules/es6.function.name.js":"../../node_modules/core-js/modules/es6.function.name.js","core-js/modules/es6.map.js":"../../node_modules/core-js/modules/es6.map.js","core-js/modules/es6.math.acosh.js":"../../node_modules/core-js/modules/es6.math.acosh.js","core-js/modules/es6.math.asinh.js":"../../node_modules/core-js/modules/es6.math.asinh.js","core-js/modules/es6.math.atanh.js":"../../node_modules/core-js/modules/es6.math.atanh.js","core-js/modules/es6.math.cbrt.js":"../../node_modules/core-js/modules/es6.math.cbrt.js","core-js/modules/es6.math.clz32.js":"../../node_modules/core-js/modules/es6.math.clz32.js","core-js/modules/es6.math.cosh.js":"../../node_modules/core-js/modules/es6.math.cosh.js","core-js/modules/es6.math.expm1.js":"../../node_modules/core-js/modules/es6.math.expm1.js","core-js/modules/es6.math.fround.js":"../../node_modules/core-js/modules/es6.math.fround.js","core-js/modules/es6.math.hypot.js":"../../node_modules/core-js/modules/es6.math.hypot.js","core-js/modules/es6.math.imul.js":"../../node_modules/core-js/modules/es6.math.imul.js","core-js/modules/es6.math.log1p.js":"../../node_modules/core-js/modules/es6.math.log1p.js","core-js/modules/es6.math.log10.js":"../../node_modules/core-js/modules/es6.math.log10.js","core-js/modules/es6.math.log2.js":"../../node_modules/core-js/modules/es6.math.log2.js","core-js/modules/es6.math.sign.js":"../../node_modules/core-js/modules/es6.math.sign.js","core-js/modules/es6.math.sinh.js":"../../node_modules/core-js/modules/es6.math.sinh.js","core-js/modules/es6.math.tanh.js":"../../node_modules/core-js/modules/es6.math.tanh.js","core-js/modules/es6.math.trunc.js":"../../node_modules/core-js/modules/es6.math.trunc.js","core-js/modules/es6.number.constructor.js":"../../node_modules/core-js/modules/es6.number.constructor.js","core-js/modules/es6.number.epsilon.js":"../../node_modules/core-js/modules/es6.number.epsilon.js","core-js/modules/es6.number.is-finite.js":"../../node_modules/core-js/modules/es6.number.is-finite.js","core-js/modules/es6.number.is-integer.js":"../../node_modules/core-js/modules/es6.number.is-integer.js","core-js/modules/es6.number.is-nan.js":"../../node_modules/core-js/modules/es6.number.is-nan.js","core-js/modules/es6.number.is-safe-integer.js":"../../node_modules/core-js/modules/es6.number.is-safe-integer.js","core-js/modules/es6.number.max-safe-integer.js":"../../node_modules/core-js/modules/es6.number.max-safe-integer.js","core-js/modules/es6.number.min-safe-integer.js":"../../node_modules/core-js/modules/es6.number.min-safe-integer.js","core-js/modules/es6.number.parse-float.js":"../../node_modules/core-js/modules/es6.number.parse-float.js","core-js/modules/es6.number.parse-int.js":"../../node_modules/core-js/modules/es6.number.parse-int.js","core-js/modules/es6.object.assign.js":"../../node_modules/core-js/modules/es6.object.assign.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.entries.js":"../../node_modules/core-js/modules/es7.object.entries.js","core-js/modules/es6.object.freeze.js":"../../node_modules/core-js/modules/es6.object.freeze.js","core-js/modules/es6.object.get-own-property-descriptor.js":"../../node_modules/core-js/modules/es6.object.get-own-property-descriptor.js","core-js/modules/es7.object.get-own-property-descriptors.js":"../../node_modules/core-js/modules/es7.object.get-own-property-descriptors.js","core-js/modules/es6.object.get-own-property-names.js":"../../node_modules/core-js/modules/es6.object.get-own-property-names.js","core-js/modules/es6.object.get-prototype-of.js":"../../node_modules/core-js/modules/es6.object.get-prototype-of.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.prevent-extensions.js":"../../node_modules/core-js/modules/es6.object.prevent-extensions.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es6.object.is.js":"../../node_modules/core-js/modules/es6.object.is.js","core-js/modules/es6.object.is-frozen.js":"../../node_modules/core-js/modules/es6.object.is-frozen.js","core-js/modules/es6.object.is-sealed.js":"../../node_modules/core-js/modules/es6.object.is-sealed.js","core-js/modules/es6.object.is-extensible.js":"../../node_modules/core-js/modules/es6.object.is-extensible.js","core-js/modules/es6.object.keys.js":"../../node_modules/core-js/modules/es6.object.keys.js","core-js/modules/es6.object.seal.js":"../../node_modules/core-js/modules/es6.object.seal.js","core-js/modules/es7.object.values.js":"../../node_modules/core-js/modules/es7.object.values.js","core-js/modules/es6.promise.js":"../../node_modules/core-js/modules/es6.promise.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.reflect.apply.js":"../../node_modules/core-js/modules/es6.reflect.apply.js","core-js/modules/es6.reflect.construct.js":"../../node_modules/core-js/modules/es6.reflect.construct.js","core-js/modules/es6.reflect.define-property.js":"../../node_modules/core-js/modules/es6.reflect.define-property.js","core-js/modules/es6.reflect.delete-property.js":"../../node_modules/core-js/modules/es6.reflect.delete-property.js","core-js/modules/es6.reflect.get.js":"../../node_modules/core-js/modules/es6.reflect.get.js","core-js/modules/es6.reflect.get-own-property-descriptor.js":"../../node_modules/core-js/modules/es6.reflect.get-own-property-descriptor.js","core-js/modules/es6.reflect.get-prototype-of.js":"../../node_modules/core-js/modules/es6.reflect.get-prototype-of.js","core-js/modules/es6.reflect.has.js":"../../node_modules/core-js/modules/es6.reflect.has.js","core-js/modules/es6.reflect.is-extensible.js":"../../node_modules/core-js/modules/es6.reflect.is-extensible.js","core-js/modules/es6.reflect.own-keys.js":"../../node_modules/core-js/modules/es6.reflect.own-keys.js","core-js/modules/es6.reflect.prevent-extensions.js":"../../node_modules/core-js/modules/es6.reflect.prevent-extensions.js","core-js/modules/es6.reflect.set.js":"../../node_modules/core-js/modules/es6.reflect.set.js","core-js/modules/es6.reflect.set-prototype-of.js":"../../node_modules/core-js/modules/es6.reflect.set-prototype-of.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.set.js":"../../node_modules/core-js/modules/es6.set.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es6.string.anchor.js":"../../node_modules/core-js/modules/es6.string.anchor.js","core-js/modules/es6.string.big.js":"../../node_modules/core-js/modules/es6.string.big.js","core-js/modules/es6.string.blink.js":"../../node_modules/core-js/modules/es6.string.blink.js","core-js/modules/es6.string.bold.js":"../../node_modules/core-js/modules/es6.string.bold.js","core-js/modules/es6.string.code-point-at.js":"../../node_modules/core-js/modules/es6.string.code-point-at.js","core-js/modules/es6.string.ends-with.js":"../../node_modules/core-js/modules/es6.string.ends-with.js","core-js/modules/es6.string.fixed.js":"../../node_modules/core-js/modules/es6.string.fixed.js","core-js/modules/es6.string.fontcolor.js":"../../node_modules/core-js/modules/es6.string.fontcolor.js","core-js/modules/es6.string.fontsize.js":"../../node_modules/core-js/modules/es6.string.fontsize.js","core-js/modules/es6.string.from-code-point.js":"../../node_modules/core-js/modules/es6.string.from-code-point.js","core-js/modules/es6.string.includes.js":"../../node_modules/core-js/modules/es6.string.includes.js","core-js/modules/es6.string.italics.js":"../../node_modules/core-js/modules/es6.string.italics.js","core-js/modules/es6.string.iterator.js":"../../node_modules/core-js/modules/es6.string.iterator.js","core-js/modules/es6.string.link.js":"../../node_modules/core-js/modules/es6.string.link.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es6.string.raw.js":"../../node_modules/core-js/modules/es6.string.raw.js","core-js/modules/es6.string.repeat.js":"../../node_modules/core-js/modules/es6.string.repeat.js","core-js/modules/es6.string.small.js":"../../node_modules/core-js/modules/es6.string.small.js","core-js/modules/es6.string.starts-with.js":"../../node_modules/core-js/modules/es6.string.starts-with.js","core-js/modules/es6.string.strike.js":"../../node_modules/core-js/modules/es6.string.strike.js","core-js/modules/es6.string.sub.js":"../../node_modules/core-js/modules/es6.string.sub.js","core-js/modules/es6.string.sup.js":"../../node_modules/core-js/modules/es6.string.sup.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/es6.typed.array-buffer.js":"../../node_modules/core-js/modules/es6.typed.array-buffer.js","core-js/modules/es6.typed.int8-array.js":"../../node_modules/core-js/modules/es6.typed.int8-array.js","core-js/modules/es6.typed.uint8-array.js":"../../node_modules/core-js/modules/es6.typed.uint8-array.js","core-js/modules/es6.typed.uint8-clamped-array.js":"../../node_modules/core-js/modules/es6.typed.uint8-clamped-array.js","core-js/modules/es6.typed.int16-array.js":"../../node_modules/core-js/modules/es6.typed.int16-array.js","core-js/modules/es6.typed.uint16-array.js":"../../node_modules/core-js/modules/es6.typed.uint16-array.js","core-js/modules/es6.typed.int32-array.js":"../../node_modules/core-js/modules/es6.typed.int32-array.js","core-js/modules/es6.typed.uint32-array.js":"../../node_modules/core-js/modules/es6.typed.uint32-array.js","core-js/modules/es6.typed.float32-array.js":"../../node_modules/core-js/modules/es6.typed.float32-array.js","core-js/modules/es6.typed.float64-array.js":"../../node_modules/core-js/modules/es6.typed.float64-array.js","core-js/modules/es6.weak-map.js":"../../node_modules/core-js/modules/es6.weak-map.js","core-js/modules/es6.weak-set.js":"../../node_modules/core-js/modules/es6.weak-set.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","bootstrap/dist/js/bootstrap.bundle.min.js":"../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js","regenerator-runtime/runtime.js":"../../node_modules/regenerator-runtime/runtime.js","./mapbox":"mapbox.ts","./auth/logout":"auth/logout.ts","./auth/login":"auth/login.ts","./stripe":"stripe.ts","./alerts":"alerts.ts","./modules/handleAdventureForm":"modules/handleAdventureForm.ts","./modules/dashboardNav":"modules/dashboardNav.ts","./modules/populateAdventureForm":"modules/populateAdventureForm.ts","./modules/handleSettingsForm":"modules/handleSettingsForm.ts"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"core-js/modules/es6.array.copy-within.js":"../../node_modules/core-js/modules/es6.array.copy-within.js","core-js/modules/es6.array.fill.js":"../../node_modules/core-js/modules/es6.array.fill.js","core-js/modules/es6.array.filter.js":"../../node_modules/core-js/modules/es6.array.filter.js","core-js/modules/es6.array.find.js":"../../node_modules/core-js/modules/es6.array.find.js","core-js/modules/es6.array.find-index.js":"../../node_modules/core-js/modules/es6.array.find-index.js","core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.from.js":"../../node_modules/core-js/modules/es6.array.from.js","core-js/modules/es7.array.includes.js":"../../node_modules/core-js/modules/es7.array.includes.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.map.js":"../../node_modules/core-js/modules/es6.array.map.js","core-js/modules/es6.array.of.js":"../../node_modules/core-js/modules/es6.array.of.js","core-js/modules/es6.array.slice.js":"../../node_modules/core-js/modules/es6.array.slice.js","core-js/modules/es6.array.species.js":"../../node_modules/core-js/modules/es6.array.species.js","core-js/modules/es6.date.to-primitive.js":"../../node_modules/core-js/modules/es6.date.to-primitive.js","core-js/modules/es6.function.has-instance.js":"../../node_modules/core-js/modules/es6.function.has-instance.js","core-js/modules/es6.function.name.js":"../../node_modules/core-js/modules/es6.function.name.js","core-js/modules/es6.map.js":"../../node_modules/core-js/modules/es6.map.js","core-js/modules/es6.math.acosh.js":"../../node_modules/core-js/modules/es6.math.acosh.js","core-js/modules/es6.math.asinh.js":"../../node_modules/core-js/modules/es6.math.asinh.js","core-js/modules/es6.math.atanh.js":"../../node_modules/core-js/modules/es6.math.atanh.js","core-js/modules/es6.math.cbrt.js":"../../node_modules/core-js/modules/es6.math.cbrt.js","core-js/modules/es6.math.clz32.js":"../../node_modules/core-js/modules/es6.math.clz32.js","core-js/modules/es6.math.cosh.js":"../../node_modules/core-js/modules/es6.math.cosh.js","core-js/modules/es6.math.expm1.js":"../../node_modules/core-js/modules/es6.math.expm1.js","core-js/modules/es6.math.fround.js":"../../node_modules/core-js/modules/es6.math.fround.js","core-js/modules/es6.math.hypot.js":"../../node_modules/core-js/modules/es6.math.hypot.js","core-js/modules/es6.math.imul.js":"../../node_modules/core-js/modules/es6.math.imul.js","core-js/modules/es6.math.log1p.js":"../../node_modules/core-js/modules/es6.math.log1p.js","core-js/modules/es6.math.log10.js":"../../node_modules/core-js/modules/es6.math.log10.js","core-js/modules/es6.math.log2.js":"../../node_modules/core-js/modules/es6.math.log2.js","core-js/modules/es6.math.sign.js":"../../node_modules/core-js/modules/es6.math.sign.js","core-js/modules/es6.math.sinh.js":"../../node_modules/core-js/modules/es6.math.sinh.js","core-js/modules/es6.math.tanh.js":"../../node_modules/core-js/modules/es6.math.tanh.js","core-js/modules/es6.math.trunc.js":"../../node_modules/core-js/modules/es6.math.trunc.js","core-js/modules/es6.number.constructor.js":"../../node_modules/core-js/modules/es6.number.constructor.js","core-js/modules/es6.number.epsilon.js":"../../node_modules/core-js/modules/es6.number.epsilon.js","core-js/modules/es6.number.is-finite.js":"../../node_modules/core-js/modules/es6.number.is-finite.js","core-js/modules/es6.number.is-integer.js":"../../node_modules/core-js/modules/es6.number.is-integer.js","core-js/modules/es6.number.is-nan.js":"../../node_modules/core-js/modules/es6.number.is-nan.js","core-js/modules/es6.number.is-safe-integer.js":"../../node_modules/core-js/modules/es6.number.is-safe-integer.js","core-js/modules/es6.number.max-safe-integer.js":"../../node_modules/core-js/modules/es6.number.max-safe-integer.js","core-js/modules/es6.number.min-safe-integer.js":"../../node_modules/core-js/modules/es6.number.min-safe-integer.js","core-js/modules/es6.number.parse-float.js":"../../node_modules/core-js/modules/es6.number.parse-float.js","core-js/modules/es6.number.parse-int.js":"../../node_modules/core-js/modules/es6.number.parse-int.js","core-js/modules/es6.object.assign.js":"../../node_modules/core-js/modules/es6.object.assign.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.entries.js":"../../node_modules/core-js/modules/es7.object.entries.js","core-js/modules/es6.object.freeze.js":"../../node_modules/core-js/modules/es6.object.freeze.js","core-js/modules/es6.object.get-own-property-descriptor.js":"../../node_modules/core-js/modules/es6.object.get-own-property-descriptor.js","core-js/modules/es7.object.get-own-property-descriptors.js":"../../node_modules/core-js/modules/es7.object.get-own-property-descriptors.js","core-js/modules/es6.object.get-own-property-names.js":"../../node_modules/core-js/modules/es6.object.get-own-property-names.js","core-js/modules/es6.object.get-prototype-of.js":"../../node_modules/core-js/modules/es6.object.get-prototype-of.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.prevent-extensions.js":"../../node_modules/core-js/modules/es6.object.prevent-extensions.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es6.object.is.js":"../../node_modules/core-js/modules/es6.object.is.js","core-js/modules/es6.object.is-frozen.js":"../../node_modules/core-js/modules/es6.object.is-frozen.js","core-js/modules/es6.object.is-sealed.js":"../../node_modules/core-js/modules/es6.object.is-sealed.js","core-js/modules/es6.object.is-extensible.js":"../../node_modules/core-js/modules/es6.object.is-extensible.js","core-js/modules/es6.object.keys.js":"../../node_modules/core-js/modules/es6.object.keys.js","core-js/modules/es6.object.seal.js":"../../node_modules/core-js/modules/es6.object.seal.js","core-js/modules/es7.object.values.js":"../../node_modules/core-js/modules/es7.object.values.js","core-js/modules/es6.promise.js":"../../node_modules/core-js/modules/es6.promise.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.reflect.apply.js":"../../node_modules/core-js/modules/es6.reflect.apply.js","core-js/modules/es6.reflect.construct.js":"../../node_modules/core-js/modules/es6.reflect.construct.js","core-js/modules/es6.reflect.define-property.js":"../../node_modules/core-js/modules/es6.reflect.define-property.js","core-js/modules/es6.reflect.delete-property.js":"../../node_modules/core-js/modules/es6.reflect.delete-property.js","core-js/modules/es6.reflect.get.js":"../../node_modules/core-js/modules/es6.reflect.get.js","core-js/modules/es6.reflect.get-own-property-descriptor.js":"../../node_modules/core-js/modules/es6.reflect.get-own-property-descriptor.js","core-js/modules/es6.reflect.get-prototype-of.js":"../../node_modules/core-js/modules/es6.reflect.get-prototype-of.js","core-js/modules/es6.reflect.has.js":"../../node_modules/core-js/modules/es6.reflect.has.js","core-js/modules/es6.reflect.is-extensible.js":"../../node_modules/core-js/modules/es6.reflect.is-extensible.js","core-js/modules/es6.reflect.own-keys.js":"../../node_modules/core-js/modules/es6.reflect.own-keys.js","core-js/modules/es6.reflect.prevent-extensions.js":"../../node_modules/core-js/modules/es6.reflect.prevent-extensions.js","core-js/modules/es6.reflect.set.js":"../../node_modules/core-js/modules/es6.reflect.set.js","core-js/modules/es6.reflect.set-prototype-of.js":"../../node_modules/core-js/modules/es6.reflect.set-prototype-of.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.set.js":"../../node_modules/core-js/modules/es6.set.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es6.string.anchor.js":"../../node_modules/core-js/modules/es6.string.anchor.js","core-js/modules/es6.string.big.js":"../../node_modules/core-js/modules/es6.string.big.js","core-js/modules/es6.string.blink.js":"../../node_modules/core-js/modules/es6.string.blink.js","core-js/modules/es6.string.bold.js":"../../node_modules/core-js/modules/es6.string.bold.js","core-js/modules/es6.string.code-point-at.js":"../../node_modules/core-js/modules/es6.string.code-point-at.js","core-js/modules/es6.string.ends-with.js":"../../node_modules/core-js/modules/es6.string.ends-with.js","core-js/modules/es6.string.fixed.js":"../../node_modules/core-js/modules/es6.string.fixed.js","core-js/modules/es6.string.fontcolor.js":"../../node_modules/core-js/modules/es6.string.fontcolor.js","core-js/modules/es6.string.fontsize.js":"../../node_modules/core-js/modules/es6.string.fontsize.js","core-js/modules/es6.string.from-code-point.js":"../../node_modules/core-js/modules/es6.string.from-code-point.js","core-js/modules/es6.string.includes.js":"../../node_modules/core-js/modules/es6.string.includes.js","core-js/modules/es6.string.italics.js":"../../node_modules/core-js/modules/es6.string.italics.js","core-js/modules/es6.string.iterator.js":"../../node_modules/core-js/modules/es6.string.iterator.js","core-js/modules/es6.string.link.js":"../../node_modules/core-js/modules/es6.string.link.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es6.string.raw.js":"../../node_modules/core-js/modules/es6.string.raw.js","core-js/modules/es6.string.repeat.js":"../../node_modules/core-js/modules/es6.string.repeat.js","core-js/modules/es6.string.small.js":"../../node_modules/core-js/modules/es6.string.small.js","core-js/modules/es6.string.starts-with.js":"../../node_modules/core-js/modules/es6.string.starts-with.js","core-js/modules/es6.string.strike.js":"../../node_modules/core-js/modules/es6.string.strike.js","core-js/modules/es6.string.sub.js":"../../node_modules/core-js/modules/es6.string.sub.js","core-js/modules/es6.string.sup.js":"../../node_modules/core-js/modules/es6.string.sup.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/es6.typed.array-buffer.js":"../../node_modules/core-js/modules/es6.typed.array-buffer.js","core-js/modules/es6.typed.int8-array.js":"../../node_modules/core-js/modules/es6.typed.int8-array.js","core-js/modules/es6.typed.uint8-array.js":"../../node_modules/core-js/modules/es6.typed.uint8-array.js","core-js/modules/es6.typed.uint8-clamped-array.js":"../../node_modules/core-js/modules/es6.typed.uint8-clamped-array.js","core-js/modules/es6.typed.int16-array.js":"../../node_modules/core-js/modules/es6.typed.int16-array.js","core-js/modules/es6.typed.uint16-array.js":"../../node_modules/core-js/modules/es6.typed.uint16-array.js","core-js/modules/es6.typed.int32-array.js":"../../node_modules/core-js/modules/es6.typed.int32-array.js","core-js/modules/es6.typed.uint32-array.js":"../../node_modules/core-js/modules/es6.typed.uint32-array.js","core-js/modules/es6.typed.float32-array.js":"../../node_modules/core-js/modules/es6.typed.float32-array.js","core-js/modules/es6.typed.float64-array.js":"../../node_modules/core-js/modules/es6.typed.float64-array.js","core-js/modules/es6.weak-map.js":"../../node_modules/core-js/modules/es6.weak-map.js","core-js/modules/es6.weak-set.js":"../../node_modules/core-js/modules/es6.weak-set.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","bootstrap/dist/js/bootstrap.bundle.min.js":"../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js","regenerator-runtime/runtime.js":"../../node_modules/regenerator-runtime/runtime.js","./mapbox":"mapbox.ts","./auth/logout":"auth/logout.ts","./auth/login":"auth/login.ts","./stripe":"stripe.ts","./alerts":"alerts.ts","./modules/initAccountSections":"modules/initAccountSections.ts","./modules/dashboardNav":"modules/dashboardNav.ts"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -14161,7 +14143,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50886" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60616" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

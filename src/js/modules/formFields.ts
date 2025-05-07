@@ -98,9 +98,10 @@ export const imagesPreviewContainer = (adventure: Partial<Adventure> = {}) => {
 
   imagesPreviewContainer.innerHTML = ''; // Clear previous
 
-  if (Array.isArray(adventure.images)) {
-    adventure.images.forEach((img, i) => {
-      const checkbox = `
+  if (!(Array.isArray(adventure.images) && adventure.images.length > 0)) return;
+
+  adventure.images.forEach((img, i) => {
+    const checkbox = `
       <div class="mb-2">
         <input class="form-check-input" type="checkbox" name="deleteImages" id="deleteImage-${i}" value="${img}">
         <label class="form-check-label ms-2" for="deleteImage-${i}">Delete image ${i + 1}</label>
@@ -108,7 +109,6 @@ export const imagesPreviewContainer = (adventure: Partial<Adventure> = {}) => {
         <img src="/assets/adventures/${img}" alt="Image ${i + 1}" width="150" class="img-thumbnail mt-2">
       </div>
     `;
-      imagesPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
-    });
-  }
+    imagesPreviewContainer.insertAdjacentHTML('beforeend', checkbox);
+  });
 };

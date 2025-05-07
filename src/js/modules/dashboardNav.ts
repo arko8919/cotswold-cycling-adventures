@@ -1,5 +1,6 @@
 import { loadSection } from '../api/loadSection';
 import { handleAdventureForm } from './handleAdventureForm';
+import { initManageAdventuresForms } from './initAccountSections';
 import { populateAdventureForm } from './populateAdventureForm';
 
 /**
@@ -38,8 +39,7 @@ export const dashboardNav = () => {
 
       // Note: If this block grows in the future, consider moving it to a separate handler
       if (section === 'manage-adventures') {
-        handleAdventureForm();
-        populateAdventureForm();
+        initManageAdventuresForms();
       }
     });
   });
@@ -50,8 +50,7 @@ export const dashboardNav = () => {
 
     // Note: If this block grows in the future, consider moving it to a separate handler
     if (section === 'manage-adventures') {
-      handleAdventureForm();
-      populateAdventureForm();
+      initManageAdventuresForms();
     }
   });
 };

@@ -1,3 +1,5 @@
+import { Adventure } from './base';
+
 export interface User {
   email: string;
   name: string;
@@ -9,7 +11,7 @@ export interface User {
 }
 
 export interface LoginResponse {
-  status: string;
+  status: 'success' | 'fail' | 'error';
   token: string;
   // Note: Specify what exactly we receive from server, ( maybe use Zod package? )
   data: {
@@ -18,7 +20,7 @@ export interface LoginResponse {
 }
 
 export interface CheckoutSessionResponse {
-  status: 'success';
+  status: 'success' | 'fail' | 'error';
   session: {
     id: string;
     object: 'checkout.session';
@@ -45,7 +47,16 @@ export interface CheckoutSessionResponse {
 }
 
 export interface UpdatedUser {
-  status: string;
+  status: 'success' | 'fail' | 'error';
   token?: string;
   data: User;
 }
+
+export interface ApiResponse<T> {
+  status: 'success' | 'fail' | 'error';
+  data: {
+    data: T;
+  };
+}
+
+export type AdventureResponse = ApiResponse<Adventure>;

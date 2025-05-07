@@ -1,6 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { showAlert } from '../alerts';
 import getErrorMessage from '../utils/errorHandler';
+import { AdventureResponse } from '@js/types';
 
 /**
  * Creates or updates an adventure by sending a POST or PATCH request.
@@ -13,18 +14,18 @@ import getErrorMessage from '../utils/errorHandler';
 export const createAdventure = async (
   data: FormData,
   action: 'create' | 'update',
-  id: string = '',
+  id?: string,
 ) => {
   try {
     let url = '/api/v1/adventures';
-    let res: AxiosResponse<any>;
+    let res;
 
     switch (action) {
       case 'create':
-        res = await axios.post(url, data);
+        res = await axios.post<AdventureResponse>(url, data);
         break;
       case 'update':
-        res = await axios.patch(`${url}/${id}`, data);
+        res = await axios.patch<AdventureResponse>(`${url}/${id}`, data);
         break;
       default:
         throw new Error(`Invalid action: ${action}`);
@@ -37,7 +38,12 @@ export const createAdventure = async (
       });
     }
   } catch (err) {
-    const message = getErrorMessage(err, 'Adventure operation failed.');
+    const message = getErrorMessage(
+      err,
+      action === 'create'
+        ? 'Adventure creation failed'
+        : 'Adventure updating failed',
+    );
     showAlert({ type: 'error', message });
   }
 };

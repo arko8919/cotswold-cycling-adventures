@@ -1,8 +1,9 @@
 import { GeoLocation } from '@js/types';
 
 /**
- * Access the globally loaded MapboxGL instance from the CDN <script> tag and inform TypeScript
- * to treat it as an imported 'mapbox-gl' module.
+ * Access the MapboxGL instance loaded via CDN (only on specific pages like the adventure page)
+ * and tell TypeScript to treat it as the same type as an imported 'mapbox-gl' module.
+ * This allows proper IntelliSense and type checking when using `mapboxgl` in those files.
  *
  * Note:
  * - The 'mapbox-gl' module was not installed due to compatibility issues with other modules
@@ -14,7 +15,7 @@ import { GeoLocation } from '@js/types';
 const mapbox = (window as any).mapboxgl as typeof import('mapbox-gl');
 
 /**
- * Displays an interactive Mapbox map with location markers.
+ * Displays an interactive Mapbox map with adventure location markers.
  *
  * @param {GeoLocation[]} locations - An array of location objects containing coordinates and descriptions.
  *
@@ -36,7 +37,7 @@ const displayMap = (locations: GeoLocation[]): void => {
 
   locations.forEach((loc) => {
     // Create marker
-    const marker = document.createElement('div');
+    const marker = document.createElement('div') as HTMLDivElement;
     marker.className = 'marker';
 
     // Adds a marker and adjusts the map to include the location

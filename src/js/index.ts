@@ -7,13 +7,11 @@ import logout from './auth/logout';
 import login from './auth/login';
 import bookAdventure from './stripe';
 import { showAlert } from './alerts';
-import { handleAdventureForm } from './modules/handleAdventureForm';
-import { dashboardNav } from './modules/dashboardNav';
-import { populateAdventureForm } from './modules/populateAdventureForm';
 import {
-  handleUserForm,
-  handlePasswordForm,
-} from './modules/handleSettingsForm';
+  initSettingsForms,
+  initManageAdventuresForms,
+} from './modules/initAccountSections';
+import { dashboardNav } from './modules/dashboardNav';
 
 /**
  * Initializes client-side functionality for various pages.
@@ -62,28 +60,6 @@ const initLogout = () => {
   btnLogout?.addEventListener('click', logout);
 };
 
-// Initializes user account "settings" section form handlers
-const initSettingsForms = () => {
-  const userDataForm = document.querySelector(
-    '.form-user-data',
-  ) as HTMLFormElement | null;
-  const userPasswordForm = document.querySelector(
-    '.form-user-password',
-  ) as HTMLFormElement | null;
-
-  // Handle user data update form submission
-  userDataForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handleUserForm();
-  });
-
-  // Handles password update form submission
-  userPasswordForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handlePasswordForm();
-  });
-};
-
 // Initializes booking button functionality on the adventure page
 const initBooking = () => {
   const bookBtn = document.getElementById(
@@ -102,33 +78,35 @@ const initBooking = () => {
   });
 };
 
-// Initializes map in selected adventure page
+// Initializes map on the adventure page
 const initMap = () => {
   const mapBox = document.getElementById('map') as HTMLDivElement;
 
-  if (mapBox) {
-    mapBox.innerHTML = '';
+  if (!mapBox) return;
 
-    // Get location data from data attribute ( json format )
-    const data = mapBox.dataset.locations;
+  mapBox.innerHTML = '';
 
-    if (data) {
-      const locations: GeoLocation[] = JSON.parse(data);
-      displayMap(locations);
-    }
-  }
+  // Get location data from data attribute ( json format )
+  const data = mapBox.dataset.locations;
+
+  if (!data) return;
+
+  const locations: GeoLocation[] = JSON.parse(data);
+  displayMap(locations);
 };
 
 // Displays a success alert using the message stored in the body data attribute (data-alert)
 const showAlertFromBody = () => {
-  if (document.body.dataset.alert)
-    showAlert({
-      type: 'success',
-      message: document.body.dataset.alert,
-      timeout: 20,
-    });
+  if (!document.body.dataset.alert) return;
+
+  showAlert({
+    type: 'success',
+    message: document.body.dataset.alert,
+    timeout: 20,
+  });
 };
 
+// Get the current displayed page name
 const page = document.body.dataset.page;
 
 // Load only files needed for the page being loaded
@@ -145,8 +123,7 @@ switch (page) {
   case 'account':
     dashboardNav();
     initSettingsForms();
-    populateAdventureForm();
-    handleAdventureForm();
+    initManageAdventuresForms();
     break;
   default:
 }
