@@ -2,16 +2,16 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@babel/polyfill';
 
 import { GeoLocation } from '@js/types';
-import displayMap from './mapbox';
+import displayMap from './adventure/mapbox';
 import logout from './auth/logout';
 import login from './auth/login';
-import bookAdventure from './stripe';
-import { showAlert } from './alerts';
+import bookAdventure from './adventure/stripe';
+import { showAlert } from './utils/alerts';
 import {
   initSettingsForms,
   initManageAdventuresForms,
-} from './modules/initAccountSections';
-import { dashboardNav } from './modules/dashboardNav';
+} from './account/initAccountSections';
+import { dashboardNav } from './account/dashboardNav';
 
 /**
  * Initializes client-side functionality for various pages.

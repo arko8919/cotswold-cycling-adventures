@@ -1,14 +1,4 @@
-import { Adventure } from './base';
-
-export interface User {
-  email: string;
-  name: string;
-  passwordChangedAt: string;
-  photo: string;
-  role: string;
-  __v: number;
-  _id: string;
-}
+import { Adventure, User } from './base';
 
 export interface LoginResponse {
   status: 'success' | 'fail' | 'error';

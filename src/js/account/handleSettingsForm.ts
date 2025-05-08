@@ -1,4 +1,4 @@
-import { updateSettings } from '../api/updateSettings';
+import { updateUserSettings } from '../api/updateUserSettings';
 
 /**
  *  Handles updating user profile information.
@@ -17,7 +17,7 @@ export const handleUserForm = () => {
   if (photo) form.append('photo', photo);
 
   // Submit the data as a FormData object
-  updateSettings(form, 'data');
+  updateUserSettings(form, 'data');
 };
 
 /**
@@ -33,7 +33,7 @@ export const handlePasswordForm = async () => {
   ) as HTMLInputElement;
 
   // Submit data to the server
-  await updateSettings(
+  await updateUserSettings(
     {
       passwordCurrent: passwordCurrentInput.value,
       password: passwordInput.value,

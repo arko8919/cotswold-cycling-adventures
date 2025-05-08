@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { showAlert } from '../alerts';
+import { showAlert } from '../utils/alerts';
 import getErrorMessage from '../utils/errorHandler';
 
 /**

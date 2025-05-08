@@ -6,6 +6,16 @@ export interface AlertMessage {
   timeout?: number;
 }
 
+export interface User {
+  email: string;
+  name: string;
+  passwordChangedAt: string;
+  photo: string;
+  role: string;
+  __v: number;
+  _id: string;
+}
+
 export interface Adventure {
   _id: string;
   __v: number;

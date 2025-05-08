@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { showAlert } from '../alerts';
+import { showAlert } from '../utils/alerts';
 import getErrorMessage from '../utils/errorHandler';
 import { UpdatedUser } from '@js/types';
 
@@ -16,7 +16,7 @@ type PasswordData = {
  * @param type - Action type: either 'data' for profile info or 'password' for password change.
  *
  */
-export const updateSettings = async (
+export const updateUserSettings = async (
   data: FormData | PasswordData,
   type: 'password' | 'data',
 ) => {

@@ -180,6 +180,12 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
 
+// Handle Chrome DevTools probing request to avoid unnecessary 404 errors in console.
+// This path is requested automatically by Chrome; we respond with 204 No Content to silence it.
+app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
+  res.status(204).send();
+});
+
 // Handles undefined routes by passing a custom error message to the
 //  next middleware, ensuring proper 404 error handling.
 app.all('*', (req, res, next) => {

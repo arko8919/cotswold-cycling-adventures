@@ -1,5 +1,6 @@
 import axios from 'axios';
 import getErrorMessage from '../utils/errorHandler';
+import { showAlert } from '../utils/alerts';
 
 const contentDiv = document.getElementById('dynamic-content') as HTMLDivElement;
 
@@ -13,7 +14,7 @@ export const loadSection = async (section: string) => {
     const url = `/me/${section}`;
 
     // Fetch the raw HTML string of the requested section
-    const res = await axios.get(url);
+    const res = await axios.get<string>(url);
 
     // Parse the fetched HTML string into a document object
     const parser = new DOMParser();
@@ -26,7 +27,8 @@ export const loadSection = async (section: string) => {
     // Update the browser URL without triggering a page reload
     history.pushState({}, '', url);
   } catch (err) {
-    getErrorMessage(err, 'Failed to load section:');
+    const message = getErrorMessage(err, 'Failed to load section:');
+    showAlert({ type: 'error', message });
 
     // Display fallback content if the section fails to load
     contentDiv.innerHTML = '<h2>Error loading content. Try again.</h2>';

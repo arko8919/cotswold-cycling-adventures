@@ -3,7 +3,7 @@
     h2.mb-4 List of adventures 
     form.form-adventure-list
       select.form-select.form-select-lg.mb-3(aria-label="Select adventures")
-        option.selected(value="") None
+        option.selected(value="") Create New Adventure
         each adventure in adventures
           option(value=`${adventure._id}`)= adventure.name
 

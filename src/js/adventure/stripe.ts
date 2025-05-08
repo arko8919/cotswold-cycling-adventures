@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { showAlert } from './alerts';
-import getErrorMessage from './utils/errorHandler';
+import { showAlert } from '../utils/alerts';
+import getErrorMessage from '../utils/errorHandler';
 import { CheckoutSessionResponse } from '@js/types';
 
 // Public key for stripe

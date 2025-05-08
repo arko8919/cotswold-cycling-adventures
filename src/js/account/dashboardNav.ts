@@ -1,7 +1,8 @@
 import { loadSection } from '../api/loadSection';
-import { handleAdventureForm } from './handleAdventureForm';
-import { initManageAdventuresForms } from './initAccountSections';
-import { populateAdventureForm } from './populateAdventureForm';
+import {
+  initManageAdventuresForms,
+  initSettingsForms,
+} from './initAccountSections';
 
 /**
  * Initializes dashboard navigation.
@@ -22,9 +23,9 @@ export const dashboardNav = () => {
       // Use closest() to ensure we always get the nearest <li> ancestor with a data-section attribute
       const target = (e.target as HTMLElement).closest('li[data-section]');
 
-      if (!(target instanceof HTMLLIElement)) return;
+      if (!target || !(target instanceof HTMLLIElement)) return;
 
-      const section = (target as HTMLElement).dataset.section;
+      const section = (target as HTMLLIElement).dataset.section;
 
       if (!section) return;
       await loadSection(section);
@@ -37,20 +38,34 @@ export const dashboardNav = () => {
       //  Remember active item
       activeDashSection = target;
 
-      // Note: If this block grows in the future, consider moving it to a separate handler
-      if (section === 'manage-adventures') {
-        initManageAdventuresForms();
-      }
+      initDashboardSections(section);
     });
   });
 
+  // Handle browser back/forward buttons to load the correct section dynamically
   window.addEventListener('popstate', async () => {
     const section = window.location.pathname.split('/')[2] || 'settings';
     await loadSection(section);
 
-    // Note: If this block grows in the future, consider moving it to a separate handler
-    if (section === 'manage-adventures') {
-      initManageAdventuresForms();
-    }
+    initDashboardSections(section);
   });
+};
+
+/**
+ * Initializes dashboard logic based on the active section.
+ * Called after HTML content has been dynamically injected.
+ *
+ * @param section - The current section identifier
+ */
+const initDashboardSections = (section: string) => {
+  switch (section) {
+    case 'manage-adventures':
+      initManageAdventuresForms();
+      break;
+    case 'settings':
+      initSettingsForms();
+      break;
+    default:
+      initSettingsForms();
+  }
 };

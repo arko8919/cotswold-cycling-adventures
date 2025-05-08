@@ -9,12 +9,7 @@ import { fillAdventureForm } from './fillAdventureForm';
 import { GeoLocation } from '@js/types';
 import { Guide } from '@js/types';
 import getErrorMessage from '../utils/errorHandler';
-import { showAlert } from '../alerts';
-
-// DOM References
-const btnSubmitAdventure = document.getElementById(
-  'submit-adventure',
-) as HTMLButtonElement;
+import { showAlert } from '../utils/alerts';
 
 /**
  * Handles populating the adventure form when an adventure is selected from a dropdown in Manage adventures section
@@ -28,6 +23,10 @@ const btnSubmitAdventure = document.getElementById(
  */
 const populateAdventureForm = async (e: Event) => {
   try {
+    const btnSubmitAdventure = document.getElementById(
+      'submit-adventure',
+    ) as HTMLButtonElement;
+
     // If adventure is selected then change button label to Update adventure
     btnSubmitAdventure.textContent = 'Update Adventure';
 

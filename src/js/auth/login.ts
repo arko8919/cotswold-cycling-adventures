@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { LoginResponse } from '@js/types';
-import { showAlert } from '../alerts';
+import { showAlert } from '../utils/alerts';
 import getErrorMessage from '../utils/errorHandler';
 
 /**

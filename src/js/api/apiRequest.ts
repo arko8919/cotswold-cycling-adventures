@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, Method } from 'axios';
-import { showAlert } from '../alerts';
+import { showAlert } from '../utils/alerts';
 import getErrorMessage from '@js/utils/errorHandler';
 
 interface ApiRequestOptions {

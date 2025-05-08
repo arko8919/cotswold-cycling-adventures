@@ -1,19 +1,19 @@
-import { createAdventure } from '../api/createAdventure';
+import { createAdventure, saveAdventure } from '../api/saveAdventure';
 
 /**
- * Initializes and handles the adventure creation/edit form.
+ * Handles the adventure create/update form.
  *
  * Responsibilities:
  * - Collects all form field values, including:
  *   - Basic adventure info (name, distance, duration, etc.)
  *   - Images (cover image and additional images)
- *   - Start location and multiple additional locations
- *   - Selected guides
  *   - Selected images to delete
  *   - Adventure start dates
+ *   - Start location and multiple additional locations
+ *   - Selected guides
+ *
  * - Compiles all data into a FormData object for server submission.
- * - Sends either a create or update request based on whether an adventure is selected.
- * - Logs all form data to the console for debugging.
+ * - Sends either a create or update request based on whether an adventure is selected or 'Create New Adventure' option.
  *
  */
 const handleAdventureForm = (e: SubmitEvent) => {
@@ -183,9 +183,9 @@ const handleAdventureForm = (e: SubmitEvent) => {
 
   // Decide whether to create a new adventure or update an existing one
   if (!selectedAdventureId) {
-    createAdventure(formData, 'create');
+    saveAdventure(formData, 'create');
   } else {
-    createAdventure(formData, 'update', selectedAdventureId);
+    saveAdventure(formData, 'update', selectedAdventureId);
   }
 };
 

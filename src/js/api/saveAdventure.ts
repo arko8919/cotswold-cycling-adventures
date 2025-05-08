@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { showAlert } from '../alerts';
+import { showAlert } from '../utils/alerts';
 import getErrorMessage from '../utils/errorHandler';
 import { AdventureResponse } from '@js/types';
 
@@ -11,7 +11,7 @@ import { AdventureResponse } from '@js/types';
  * @param id - Adventure ID (required only for updating).
  *
  */
-export const createAdventure = async (
+export const saveAdventure = async (
   data: FormData,
   action: 'create' | 'update',
   id?: string,
