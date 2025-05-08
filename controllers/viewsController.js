@@ -40,6 +40,7 @@ exports.getAdventure = catchAsync(async (req, res, next) => {
   res.status(200).render('adventure', {
     title: `${adventure.name} adventure`,
     adventure,
+    page: 'adventure',
   });
 });
 
@@ -47,6 +48,7 @@ exports.getAdventure = catchAsync(async (req, res, next) => {
 exports.getLoginForm = (req, res, next) => {
   res.status(200).render('login', {
     title: 'Log into your account',
+    page: 'login',
   });
 };
 
@@ -63,11 +65,13 @@ exports.getAccount = catchAsync(async (req, res, next) => {
       section,
       adventures,
       users,
+      page: 'account',
     });
   } else {
     res.status(200).render('account', {
       title: 'Your Account',
       section, // Pass the section to Pug
+      page: 'account',
     });
   }
 });

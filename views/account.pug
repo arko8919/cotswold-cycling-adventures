@@ -13,7 +13,7 @@ block content
       .col-md-4
         .card.shadow-sm
           .card-header Account Menu
-          .list-group.list-group-flush
+          .list-group.list-group-flush.dashLists
             +navItem('settings', 'Settings', 'cog', section)
             +navItem('bookings', 'My bookings', 'briefcase', section)
             +navItem('reviews', 'My reviews', 'star', section)
@@ -22,7 +22,7 @@ block content
           - if (user.role === 'admin')
             .border-top.p-3.text-white.admin
               h5 Admin
-              .list-group.list-group-flush
+              .list-group.list-group-flush.dashLists
                 +navItem('manage-adventures', 'Manage adventures', 'map', section)
                 +navItem('manage-users', 'Manage users', 'users', section)
                 +navItem('manage-reviews', 'Manage reviews', 'star', section)

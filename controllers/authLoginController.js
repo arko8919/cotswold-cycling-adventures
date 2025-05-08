@@ -1,9 +1,9 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Email = require('../utils/email');
 const { createSendToken } = require('../utils/authUtils');
-const bcrypt = require('bcryptjs');
 
 // SIGNUP USER
 exports.signup = catchAsync(async (req, res, next) => {
