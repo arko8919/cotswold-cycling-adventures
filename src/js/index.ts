@@ -1,5 +1,5 @@
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import '@babel/polyfill';
+//import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
 
 import { GeoLocation } from '@js/types';
 import displayMap from './adventure/mapbox';
@@ -53,7 +53,6 @@ const initLoginForm = () => {
     login(email, password);
   });
 };
-
 // Initializes logout handler from any page
 const initLogout = () => {
   const btnLogout = document.querySelector('.btn-logout') as HTMLAnchorElement;

@@ -11,7 +11,6 @@ process.on('uncaughtException', (err) => {
   // Exit immediately since it's a fatal error
   process.exit(1);
 });
-
 // Loads environment variables from the specified config file to ensure
 // secure and flexible configuration management.
 dotenv.config({ path: './config.env' });
