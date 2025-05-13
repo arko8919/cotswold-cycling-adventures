@@ -2,18 +2,22 @@
   "name": "cotswold-cycle-adventures",
   "version": "1.0.0",
   "description": "Bike adventures in Cotswold",
-  "main": "app.js",
   "scripts": {
     "prod": "cross-env NODE_ENV=production nodemon server.js",
     "dev": "nodemon server.js",
+    "dev:ts": "nodemon --watch './**/*.ts' --exec ts-node server.ts",
     "start": "node server.js",
     "debug": "ndb server.js",
     "build:sass": "sass --quiet --style=compressed src/scss/main.scss public/css/style.css",
     "watch:sass": "npx chokidar \"src/scss/**/*.scss\" --initial -c \"npm run build:sass\"",
-    "build:js": "parcel build ./src/js/index.js --out-dir ./public/js --out-file bundle.js",
-    "watch:js": "parcel watch ./src/js/index.ts --out-dir ./public/js --out-file bundle.js",
+    "watch:js": "parcel watch src/js/index.ts --dist-dir public",
+    "build:js": "cd src/js && parcel build index.ts --dist-dir ../../public",
     "build": "npm run build:sass && npm run build:js",
-    "watch": "npm-run-all --parallel watch:sass watch:js"
+    "watch": "npm-run-all --parallel watch:sass watch:js",
+    "build:server": "tsc -p tsconfig.json",
+    "start:server": "node dist/server.js",
+    "dev:full": "concurrently \"npm run dev\" \"npm run watch\"",
+    "clean:parcel": "rimraf .parcel-cache dist public/js"
   },
   "keywords": [
     "bike",
@@ -26,11 +30,14 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
+    "@types/express": "^5.0.1",
     "@types/mapbox-gl": "^3.4.1",
+    "@types/node": "^22.15.17",
     "@types/stripe": "^8.0.416",
     "@types/stripe-v3": "^3.1.33",
     "@typescript-eslint/eslint-plugin": "^8.30.1",
     "@typescript-eslint/parser": "^8.30.1",
+    "buffer": "^6.0.3",
     "concurrently": "^9.1.2",
     "connect-history-api-fallback": "^2.0.0",
     "cross-env": "^7.0.3",
@@ -43,16 +50,19 @@
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.37.4",
     "npm-run-all": "^4.1.5",
-    "parcel-bundler": "^1.12.5",
+    "parcel": "^2.15.0",
+    "parcel-resolver-tspaths": "^0.0.9",
     "prettier": "^3.5.1",
     "sass": "^1.85.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
+    "@popperjs/core": "^2.11.8",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.0",
-    "bootstrap": "^5.3.3",
+    "bootstrap": "^5.3.6",
     "chokidar-cli": "^3.0.0",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
@@ -78,5 +88,10 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "targets": {
+    "default": {
+      "context": "browser"
+    }
   }
 }
