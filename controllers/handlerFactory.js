@@ -101,12 +101,19 @@ exports.createOne = (Model) =>
         );
       }
     }
-
     // Parse locations[] from stringified JSON into real objects
     if (req.body.locations) {
       req.body.locations = Array.isArray(req.body.locations)
-        ? req.body.locations.map((loc) => JSON.parse(loc))
-        : [JSON.parse(req.body.locations)];
+        ? req.body.locations.map((loc) => {
+            if (typeof loc === 'string') {
+              return JSON.parse(loc);
+            }
+            if (typeof loc === 'object' && typeof loc[''] === 'string') {
+              return JSON.parse(loc['']); // malformed format from Postman
+            }
+            throw new Error('Invalid location format');
+          })
+        : [];
     }
 
     //  Parse startLocation if it exists and is a string

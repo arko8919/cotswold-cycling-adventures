@@ -25,7 +25,8 @@ const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
-console.log('test)');
+
+//app.set('Cache-Control', 'no-cache');
 
 // Enable 'trust proxy' to ensure Express correctly detects client IPs and protocols
 // when running behind a reverse proxy (e.g., Nginx, Cloudflare, or a load balancer).
